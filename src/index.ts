@@ -50,5 +50,15 @@ app.post("/students", (req: Request, res: Response) => {
 
   students.push(newStudent);
 
-  res.status(201).send("Cadastro realizado com sucesso");
+  res.status(201).send("Cadastro do novo aluno realizado com sucesso");
+});
+
+app.get("/students/:id", (req: Request, res: Response) => {
+  //:id poderia ser qualquer outro filtro necessário
+  const idToFind = req.params.id; // não precisamos forçar a tipagem aqui, porque todo path params é string
+
+  const result = students.find((student) => student.id === idToFind);
+
+  res.status(200).send(result);
+  // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
 });
