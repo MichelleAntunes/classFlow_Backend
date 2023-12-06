@@ -94,3 +94,17 @@ app.put("/students/:id", (req: Request, res: Response) => {
 
   res.status(200).send("Atualização realizada com sucesso");
 });
+
+app.delete("/students/:id", (req: Request, res: Response) => {
+  const idToDelete = req.params.id;
+
+  const studentIndex = students.findIndex(
+    (student) => student.id === idToDelete
+  );
+
+  if (studentIndex >= 0) {
+    students.splice(studentIndex, 1);
+  }
+
+  res.status(200).send("Item deletado com sucesso");
+});
