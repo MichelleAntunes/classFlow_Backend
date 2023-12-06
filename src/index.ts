@@ -30,3 +30,25 @@ app.get("/students", (req: Request, res: Response) => {
     res.status(200).send(students);
   }
 });
+
+app.post("/students", (req: Request, res: Response) => {
+  const id = req.body.id as string;
+  const name = req.body.name as string;
+  const age = req.body.age as number;
+  const email = req.body.email as string;
+  const telepfone = req.body.telepfone as number;
+  const notes = req.body.notes as string;
+
+  const newStudent: TStudents = {
+    id,
+    name,
+    age,
+    email,
+    telepfone,
+    notes,
+  };
+
+  students.push(newStudent);
+
+  res.status(201).send("Cadastro realizado com sucesso");
+});
