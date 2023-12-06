@@ -1,6 +1,6 @@
 import { TStudents } from "./types";
 
-export const pets: TStudents[] = [
+export const students: TStudents[] = [
   {
     id: "s001",
     name: " Aline Müller",
