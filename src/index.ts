@@ -37,7 +37,7 @@ app.post("/students", (req: Request, res: Response) => {
   const age = req.body.age as number;
   const email = req.body.email as string;
   const telepfone = req.body.telepfone as number;
-  const notes = req.body.notes as string;
+  const notes = req.body.notes as string[];
 
   const newStudent: TStudents = {
     id,
@@ -72,7 +72,7 @@ app.put("/students/:id", (req: Request, res: Response) => {
   const newEmail = req.body.email as string | undefined;
   const newAge = req.body.age as number | undefined;
   const newTelephone = req.body.telepfone as number | undefined;
-  const newNotes = req.body.notes as string | undefined;
+  const newNotes = req.body.notes as string[] | undefined;
 
   const student = students.find((student) => student.id === idToEdit);
 
@@ -107,4 +107,21 @@ app.delete("/students/:id", (req: Request, res: Response) => {
   }
 
   res.status(200).send("Item deletado com sucesso");
+});
+
+app.post("/notes/:id", (req: Request, res: Response) => {
+  const idStudent = req.params.id;
+  const newNotes = req.body.notes as string;
+
+  const resultStudent = students.find((student) => student.id === idStudent);
+
+  if (resultStudent) {
+    resultStudent.notes = Array.isArray(resultStudent.notes)
+      ? resultStudent.notes
+      : [resultStudent.notes];
+
+    resultStudent.notes.push(newNotes);
+  }
+
+  res.status(200).send("Novo comentário adicionado com sucesso");
 });
