@@ -8,5 +8,5 @@ export type TStudents = {
   email: string;
   age: number;
   telepfone: number;
-  notes: string;
+  notes: string[];
 };
