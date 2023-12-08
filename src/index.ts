@@ -19,19 +19,24 @@ app.listen(3003, () => {
 
 //
 app.get("/students", (req: Request, res: Response) => {
-  const nameToFind = req.query.name as string;
+  try {
+    const nameToFind = req.query.name as string;
 
-  if (typeof nameToFind !== "string") {
-    return res.status(400).send("'nameToFind' deve ser uma string");
-  }
+    if (nameToFind) {
+      const result: TStudents[] = students.filter((student) =>
+        student.name.toLowerCase().includes(nameToFind.toLowerCase())
+      );
 
-  if (nameToFind) {
-    const result: TStudents[] = students.filter((student) =>
-      student.name.toLowerCase().includes(nameToFind.toLowerCase())
-    );
-    res.status(200).send(result);
-  } else {
-    res.status(200).send(students);
+      if (result.length === 0) {
+        return res.status(404).send("Estudante não encontrado");
+      }
+
+      res.status(200).send(result);
+    } else {
+      res.status(200).send(students);
+    }
+  } catch (error: any) {
+    res.status(400).send(error.message);
   }
 });
 
