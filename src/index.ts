@@ -84,7 +84,10 @@ app.post("/students", (req: Request, res: Response) => {
         throw new Error("'telepfone' deve ser uma number");
       }
       const newTelephoneString: string = telepfone.toString();
-      const phoneRegex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+      const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
+      //       Pode ou não ter um prefixo de país (código de país) começando com + e seguido por até 4 dígitos.
+      // Pode ou não ter um espaço em branco após o código de país.
+      // Deve ter de 6 a 14 dígitos no número de telefone.
 
       if (!phoneRegex.test(newTelephoneString)) {
         return res
