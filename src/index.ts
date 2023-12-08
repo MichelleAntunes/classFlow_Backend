@@ -199,7 +199,7 @@ app.put("/students/:id", (req: Request, res: Response) => {
       }
 
       const newTelephoneString: string = newTelephone.toString();
-      const phoneRegex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
+      const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
 
       if (!phoneRegex.test(newTelephoneString)) {
         return res
