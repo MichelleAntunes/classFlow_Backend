@@ -238,7 +238,8 @@ app.delete("/students/:id", (req: Request, res: Response) => {
 
     students.splice(studentIndex, 1);
 
-    res.status(204).send();
+    // res.status(204).send(); esse erro não permite mensagem
+    res.status(200).send("Estudante deletado com sucesso.");
   } catch (error: any) {
     res.status(500).send(error.message);
   }
