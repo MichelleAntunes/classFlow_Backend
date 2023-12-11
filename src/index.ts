@@ -30,12 +30,17 @@ app.get("/students", (req: Request, res: Response) => {
     } else {
       res.status(200).send(students);
     }
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message); // status agora varia conforme o .statusCode
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
 
@@ -117,12 +122,17 @@ app.post("/students", (req: Request, res: Response) => {
 
     students.push(newStudent);
     res.status(201).send("Cadastro do novo aluno realizado com sucesso");
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message);
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
 
@@ -144,12 +154,17 @@ app.get("/students/:id", (req: Request, res: Response) => {
     }
     res.status(200).send(result);
     // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message);
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
 //edit
@@ -236,12 +251,17 @@ app.put("/students/:id", (req: Request, res: Response) => {
     }
 
     res.status(200).send("Atualização realizada com sucesso");
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message);
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
 
@@ -267,12 +287,17 @@ app.delete("/students/:id", (req: Request, res: Response) => {
 
     // res.status(204).send(); esse erro não permite mensagem
     res.status(200).send("Estudante deletado com sucesso.");
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message);
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
 
@@ -313,11 +338,16 @@ app.post("/notes/:id", (req: Request, res: Response) => {
     // : [newNotes]) as string[];
 
     res.status(200).send("Novo comentário adicionado com sucesso");
-  } catch (error: any) {
+  } catch (error) {
     if (res.statusCode === 200) {
       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
       res.status(500); // definimos 500 porque é algo que o servidor não previu
     }
-    res.send(error.message);
+    // adicionamos um fluxo de validação do parâmetro 'error'
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
