@@ -19,7 +19,9 @@ CREATE TABLE students (
   age INTEGER,
   notes TEXT,
   teacher_id TEXT  NOT NULL,
+   photo BLOB,
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+ 
 );
 
 DROP TABLE students;
@@ -61,10 +63,10 @@ DROP TABLE chat;
 INSERT INTO teacher (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
 
 -- Inserir alunos com IDs fictícios 's01', 's02' e 's03', associados ao professor 't01'
-INSERT INTO students (id, name, email, phone, age, notes, teacher_id) VALUES
-  ('s01', 'Student A', 'studentA@example.com', 123456789, 20, 'Note for Student A', 't01'),
-  ('s02', 'Student B', 'studentB@example.com', 987654321, 22, 'Note for Student B', 't01'),
-  ('s03', 'Student C', 'studentC@example.com', 555666777, 25, 'Note for Student C', 't01');
+INSERT INTO students (id, name, email, phone, age, notes, teacher_id, photo) VALUES
+  ('s01', 'Student A', 'studentA@example.com', 123456789, 20, 'Note for Student A', 't01', x'F1F2F3F4'),
+  ('s02', 'Student B', 'studentB@example.com', 987654321, 22, 'Note for Student B', 't01', x'F5F6F7F8'),
+  ('s03', 'Student C', 'studentC@example.com', 555666777, 25, 'Note for Student C', 't01', x'F9FAFBFC');
 
 -- Inserir relações professor-aluno
 INSERT INTO professor_student_relationship (teacher_id, student_id) VALUES
@@ -86,3 +88,23 @@ INSERT INTO chat (student_id, teacher_id, message) VALUES
 
 DROP TABLE students; -- Exemple
 
+--Lista de Alunos do Professor:
+-- Substitua 't01' pelo ID do professor logado
+SELECT students.id, students.name
+FROM students
+JOIN professor_student_relationship ON students.id = professor_student_relationship.student_id
+WHERE professor_student_relationship.teacher_id = 't01';
+
+--Detalhes do Aluno Selecionado:
+-- Substitua 't01' pelo ID do professor logado e 's01' pelo ID do aluno selecionado
+SELECT students.name, students.phone, students.email, students.notes, students.photo
+FROM students
+JOIN professor_student_relationship ON students.id = professor_student_relationship.student_id
+WHERE professor_student_relationship.teacher_id = 't01'
+  AND students.id = 's01';
+
+
+ --Incluir Novo Aluno:
+ -- Substitua 't01' pelos dados do professor e forneça os valores apropriados para o novo aluno
+INSERT INTO students (id, name, email, phone, age, notes, teacher_id)
+VALUES ('s04', 'Novo Aluno', 'novo.aluno@example.com', 123456789, 20, 'Notas do Novo Aluno', 't01');
