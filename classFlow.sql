@@ -88,6 +88,15 @@ CREATE TABLE calendar (
 
 DROP TABLE calendar; 
 
+CREATE TABLE password_reset (
+  id INTEGER PRIMARY KEY,
+  teacher_id TEXT NOT NULL,
+  token TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+);
+
+DROP TABLE password_reset; 
 INSERT INTO teacher (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
 
 -- Insert students with fictitious IDs 's01', 's02' and 's03', associated with teacher 't01'
