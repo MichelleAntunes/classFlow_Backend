@@ -8,6 +8,7 @@ CREATE TABLE teacher (
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
 );
+DROP TABLE teacher; -- Exemple
 
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
@@ -17,9 +18,11 @@ CREATE TABLE students (
   phone INTEGER,
   age INTEGER,
   notes TEXT,
-  teacher_id TEXT UNIQUE NOT NULL,
+  teacher_id TEXT  NOT NULL,
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
+
+DROP TABLE students;
 
 -- Table professor_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
 CREATE TABLE professor_student_relationship (
@@ -30,6 +33,7 @@ CREATE TABLE professor_student_relationship (
   FOREIGN KEY (student_id) REFERENCES students (id)
 );
 
+DROP TABLE professor_student_relationship; 
 -- Table notes: Stores notes associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE notes (
   id INTEGER PRIMARY KEY,
@@ -39,6 +43,8 @@ CREATE TABLE notes (
   FOREIGN KEY (student_id) REFERENCES students (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
+
+DROP TABLE notes; 
 
 -- Table chat: Stores chat messages between teachers and students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE chat (
@@ -50,6 +56,7 @@ CREATE TABLE chat (
   FOREIGN KEY (student_id) REFERENCES students (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
+DROP TABLE chat; 
 
 INSERT INTO teacher (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
 
