@@ -3,7 +3,7 @@
 -- Table teacher (professor): Stores information about teachers.
 
 CREATE TABLE teacher (
-  id TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
@@ -11,20 +11,20 @@ CREATE TABLE teacher (
 
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
-  id TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   phone INTEGER,
   age INTEGER,
   notes TEXT,
-  teacher_id TEXT,
+  teacher_id TEXT UNIQUE NOT NULL,
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
 
 -- Table professor_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
 CREATE TABLE professor_student_relationship (
-  teacher_id TEXT,
-  student_id TEXT,
+  teacher_id TEXT NOT NULL,
+  student_id TEXT NOT NULL,
   PRIMARY KEY (teacher_id, student_id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id),
   FOREIGN KEY (student_id) REFERENCES students (id)
@@ -77,19 +77,5 @@ INSERT INTO chat (student_id, teacher_id, message) VALUES
   ('s02', 't01', 'Hi Student B, did you understand the lecture?'),
   ('s03', 't01', 'Student C, please review the assignment.');
 
-
--- UPDATE students -- Exemple
--- SET
--- 	email = 'fulana@outro-email.com',
--- 	age = 30
--- WHERE id = 'c002';
-
 DROP TABLE students; -- Exemple
 
--- DELETE FROM teacher WHERE id = 1;
--- DELETE FROM chat WHERE teacher_id = 1;
--- DELETE FROM notes WHERE teacher_id = 1;
--- DELETE FROM professor_student_relationship WHERE teacher_id = 1;
--- DELETE FROM students WHERE teacher_id = 1;
-
--- SELECT * FROM students;
