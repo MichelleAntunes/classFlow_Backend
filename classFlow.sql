@@ -108,3 +108,10 @@ WHERE professor_student_relationship.teacher_id = 't01'
  -- Substitua 't01' pelos dados do professor e forneça os valores apropriados para o novo aluno
 INSERT INTO students (id, name, email, phone, age, notes, teacher_id)
 VALUES ('s04', 'Novo Aluno', 'novo.aluno@example.com', 123456789, 20, 'Notas do Novo Aluno', 't01');
+
+-- Substitua 't01' pelo ID do professor logado e forneça os novos valores apropriados
+UPDATE teacher
+SET name = 'Novo Nome',
+    email = 'novo.email@example.com',
+    password = 'nova_senha'
+WHERE id = 't01';
