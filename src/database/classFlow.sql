@@ -1,4 +1,5 @@
--- Active: 1702310954575@@127.0.0.1@3306
+-- Active: 1702490604086@@127.0.0.1@3306
+
 
 -- Table teacher (professor): Stores information about teachers.
 
