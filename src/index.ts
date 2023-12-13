@@ -273,7 +273,7 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
     const [student] = await db("students").where({ id: idToDelete });
 
     if (typeof idToDelete !== "string") {
-      res.status(406); // status apropriado para método não aceitável
+      res.status(406); // appropriate status for method not acceptable
       throw new Error("'idToDelete' deve ser uma string");
     }
 
@@ -282,7 +282,7 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
     );
 
     if (studentIndex === -1) {
-      res.status(404); // status apropriado para não encontrado
+      res.status(404); // appropriate status for not found
       throw new Error("Estudante não encontrado");
     }
     if (!student) {
@@ -296,10 +296,10 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
     res.status(200).send("Estudante deletado com sucesso.");
   } catch (error) {
     if (res.statusCode === 200) {
-      // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-      res.status(500); // definimos 500 porque é algo que o servidor não previu
+      // if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); //we set 500 because it's something the server didn't foresee
     }
-    // adicionamos um fluxo de validação do parâmetro 'error'
+    // we've added a validation flow for the 'error' parameter
     if (error instanceof Error) {
       res.send(error.message);
     } else {
@@ -308,49 +308,51 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
   }
 });
 
-// app.post("/notes/:id", (req: Request, res: Response) => {
+// app.post("/notes/:id/:teacher_id", async (req: Request, res: Response) => {
 //   try {
-//     const idStudent = req.params.id;
+//     const student_id = req.params.id;
+//     const teacher_id = req.params.teacher_id;
 //     const newNotes = req.body.notes as string;
+//     const students = await db("students");
 
-//     if (typeof idStudent !== "string") {
-//       res.status(406); // status apropriado para método não aceitável
-//       throw new Error("'idStudent' deve ser uma string");
+//     if (typeof student_id !== "string") {
+//       res.status(406); // appropriate tatus for unacceptable method
+//       throw new Error("'student_id' deve ser uma string");
 //     }
 //     if (typeof newNotes !== "string") {
-//       res.status(406); // status apropriado para método não aceitável
+//       res.status(406); // appropriate tatus for unacceptable method
 //       throw new Error("'newNotes' deve ser uma string");
 //     }
-
-//     const resultStudent = students.find((student) => student.id === idStudent);
+//     if (typeof teacher_id !== "string") {
+//       res.status(406); // appropriate tatus for unacceptable method
+//       throw new Error("'teacher_id' deve ser uma string");
+//     }
+//     const resultStudent = students.find((student) => student.id === student_id);
 
 //     if (!resultStudent) {
-//       res.status(404); // status apropriado para não encontrado
+//       res.status(404); // appropriate status for not found
 //       throw new Error("Estudante não encontrado");
 //     }
 
-//     if (resultStudent) {
-//       resultStudent.notes = Array.isArray(resultStudent.notes)
-//         ? resultStudent.notes
-//         : [resultStudent.notes];
+//     // if (resultStudent) {
+//     //   resultStudent.notes = Array.isArray(resultStudent.notes)
+//     //     ? resultStudent.notes
+//     //     : [resultStudent.notes];
+//     //   await db("students").push(newNotes);
 
-//       resultStudent.notes.push(newNotes);
-//     }
-//     // resultStudent.notes = Array.isArray(resultStudent.notes)
-//     //   ? [...resultStudent.notes, newNotes]
-//     //   : [newNotes];
-
-//     // resultStudent.notes = (Array.isArray(resultStudent.notes)
-//     // ? resultStudent.notes.concat(newNotes)
-//     // : [newNotes]) as string[];
-
-//     res.status(200).send("Novo comentário adicionado com sucesso");
+//     // }
+//     await db("notes").insert({
+//       student_id,
+//       teacher_id,
+//       notes: newNotes,
+//     });
+//     res.status(200).send("Novo comentário adicionado comsucesso");
 //   } catch (error) {
 //     if (res.statusCode === 200) {
-//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-//       res.status(500); // definimos 500 porque é algo que o servidor não previu
+//       // if it arrives still worth 200 we know it was an unexpected mistake
+//       res.status(500); // we set 500 because it's something the server didn't foresee
 //     }
-//     // adicionamos um fluxo de validação do parâmetro 'error'
+//     // we've added a validation flow for the 'error' parameter
 //     if (error instanceof Error) {
 //       res.send(error.message);
 //     } else {
