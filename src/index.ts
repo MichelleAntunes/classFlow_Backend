@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { TStudents } from "../src/database/types";
 import { db } from "../src/database/knex";
+
 const app = express();
 
 app.use(express.json());
@@ -22,7 +23,7 @@ app.get("/students", async (req: Request, res: Response) => {
       );
 
       if (result.length === 0) {
-        res.status(404); // status apropriado para não encontrado
+        res.status(404); // Appropriate status for not found
         throw new Error("Estudante não encontrado");
       }
 
@@ -32,10 +33,10 @@ app.get("/students", async (req: Request, res: Response) => {
     }
   } catch (error) {
     if (res.statusCode === 200) {
-      // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-      res.status(500); // definimos 500 porque é algo que o servidor não previu
+      //if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
     }
-    // adicionamos um fluxo de validação do parâmetro 'error'
+    // we've added a validation flow for the 'error' parameter
     if (error instanceof Error) {
       res.send(error.message);
     } else {
@@ -119,7 +120,7 @@ app.post("/students", async (req: Request, res: Response) => {
       telepfone,
       notes,
     };
-    await db("users").insert(newStudent);
+    await db("students").insert(newStudent);
     // students.push(newStudent);
     res.status(201).send("Cadastro do novo aluno realizado com sucesso");
   } catch (error) {
@@ -136,37 +137,37 @@ app.post("/students", async (req: Request, res: Response) => {
   }
 });
 
-// app.get("/students/:id", (req: Request, res: Response) => {
-//   try {
-//     //:id poderia ser qualquer outro filtro necessário
-//     const idToFind = req.params.id; // não precisamos forçar a tipagem aqui, porque todo path params é string
+app.get("/students/:id", async (req: Request, res: Response) => {
+  try {
+    //:id could be any other necessary filter
+    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
+    const students = await db("students");
+    if (typeof idToFind !== "string") {
+      res.status(406); // appropriate status for method not acceptable
+      throw new Error("'idToFind' deve ser uma string");
+    }
 
-//     if (typeof idToFind !== "string") {
-//       res.status(406); // status apropriado para método não aceitável
-//       throw new Error("'idToFind' deve ser uma string");
-//     }
+    const result = students.find((student) => student.id === idToFind);
 
-//     const result = students.find((student) => student.id === idToFind);
-
-//     if (!result) {
-//       res.status(404); // status apropriado para não encontrado
-//       throw new Error("Estudante não encontrado");
-//     }
-//     res.status(200).send(result);
-//     // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
-//   } catch (error) {
-//     if (res.statusCode === 200) {
-//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-//       res.status(500); // definimos 500 porque é algo que o servidor não previu
-//     }
-//     // adicionamos um fluxo de validação do parâmetro 'error'
-//     if (error instanceof Error) {
-//       res.send(error.message);
-//     } else {
-//       res.send("Erro inesperado");
-//     }
-//   }
-// });
+    if (!result) {
+      res.status(404); // appropriate status for not found
+      throw new Error("Estudante não encontrado");
+    }
+    res.status(200).send(result);
+    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
+  } catch (error) {
+    if (res.statusCode === 200) {
+      //if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    // we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
 // //edit
 // app.put("/students/:id", (req: Request, res: Response) => {
 //   try {
