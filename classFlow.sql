@@ -10,6 +10,15 @@ CREATE TABLE teacher (
 );
 DROP TABLE teacher; -- Exemple
 
+-- Table class: Represents classes or lists of students associated with a teacher.
+CREATE TABLE class (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  teacher_id TEXT NOT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+);
+DROP TABLE class;
+
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
   id TEXT PRIMARY KEY NOT NULL,
@@ -17,17 +26,18 @@ CREATE TABLE students (
   email TEXT UNIQUE NOT NULL,
   phone INTEGER,
   age INTEGER,
-  notes TEXT,
-  teacher_id TEXT  NOT NULL,
-   photo BLOB,
+  notes TEXT DEFAULT '', --Starts as an empty string if no value is supplied
+  annotations TEXT DEFAULT '', --Starts as an empty string if no value is supplied
+  photo BLOB DEFAULT x'F1F2F3F4', -- Default value for a dummy image (change as necessary)
+  teacher_id TEXT NOT NULL,
+    class_id TEXT NOT NULL,
+  FOREIGN KEY (class_id) REFERENCES class (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
- 
 );
-
-DROP TABLE students;
 
 -- Table professor_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
 CREATE TABLE professor_student_relationship (
+    
   teacher_id TEXT NOT NULL,
   student_id TEXT NOT NULL,
   PRIMARY KEY (teacher_id, student_id),
@@ -62,14 +72,18 @@ DROP TABLE chat;
 
 -- Table inactive_students: Stores information about inactive students.
 CREATE TABLE inactive_students (
-  id TEXT PRIMARY KEY NOT NULL,
+  id TEXT NOT NULL,
   name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
+  email TEXT  NOT NULL,
   phone INTEGER,
   age INTEGER,
-  notes TEXT,
+  notes TEXT DEFAULT '', --Starts as an empty string if no value is supplied
+  annotations TEXT DEFAULT '', --Starts as an empty string if no value is supplied
+  photo BLOB DEFAULT x'F1F2F3F4', -- Default value for a dummy image (change as necessary)
   teacher_id TEXT NOT NULL,
-  photo BLOB,
+    class_id TEXT NOT NULL,
+    
+  FOREIGN KEY (class_id) REFERENCES class (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
 
@@ -90,20 +104,37 @@ DROP TABLE calendar;
 
 CREATE TABLE password_reset (
   id INTEGER PRIMARY KEY,
-  teacher_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  user_type TEXT NOT NULL, -- 'teacher' ou 'student'
   token TEXT NOT NULL,
   expires_at TIMESTAMP NOT NULL,
+  FOREIGN KEY (user_id, user_type) REFERENCES teacher (id, 'teacher') ON DELETE CASCADE,
+  FOREIGN KEY (user_id, user_type) REFERENCES students (id, 'student') ON DELETE CASCADE
+);
+
+
+DROP TABLE password_reset; 
+
+-- Table annotations: Stores annotations associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
+CREATE TABLE annotations (
+  id INTEGER PRIMARY KEY,
+  student_id TEXT,
+  teacher_id TEXT,
+  annotation TEXT NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
 );
 
-DROP TABLE password_reset; 
+DROP TABLE annotations; 
 INSERT INTO teacher (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
 
 -- Insert students with fictitious IDs 's01', 's02' and 's03', associated with teacher 't01'
-INSERT INTO students (id, name, email, phone, age, notes, teacher_id, photo) VALUES
-  ('s01', 'Student A', 'studentA@example.com', 123456789, 20, 'Note for Student A', 't01', x'F1F2F3F4'),
-  ('s02', 'Student B', 'studentB@example.com', 987654321, 22, 'Note for Student B', 't01', x'F5F6F7F8'),
-  ('s03', 'Student C', 'studentC@example.com', 555666777, 25, 'Note for Student C', 't01', x'F9FAFBFC');
+INSERT INTO students (id, name, email, phone, age, notes, annotations, teacher_id, class_id, photo)
+VALUES
+  ('s01', 'Student A', 'studentA@example.com', 123456789, 20, '', '', 't01', 'c01', x'F1F2F3F4'),
+  ('s02', 'Student B', 'studentB@example.com', 987654321, 22, '', '', 't01', 'c01', x'F5F6F7F8'),
+  ('s03', 'Student C', 'studentC@example.com', 555666777, 25, '', '', 't01', 'c02', x'F9FAFBFC');
+
 
 -- Inserting teacher-student relationships
 INSERT INTO professor_student_relationship (teacher_id, student_id) VALUES
@@ -141,10 +172,6 @@ WHERE professor_student_relationship.teacher_id = 't01'
   AND students.id = 's01';
 
 
- --Include New Student:
- -- Replace 't01' with the teacher's data and provide the appropriate values for the new student
-INSERT INTO students (id, name, email, phone, age, notes, teacher_id)
-VALUES ('s04', 'Novo Aluno', 'novo.aluno@example.com', 123456789, 20, 'Notas do Novo Aluno', 't01');
 
 -- Replace 't01' with the ID of the logged-in teacher and provide the appropriate new values
 UPDATE teacher
@@ -153,11 +180,44 @@ SET name = 'Novo Nome',
     password = 'nova_senha'
 WHERE id = 't01';
 
+SELECT * FROM students WHERE id = 's01';
+
 -- Move student to the inactive students table
 INSERT INTO inactive_students SELECT * FROM students WHERE id = 's01';
+
+-- Delete professor-student relationships
+DELETE FROM professor_student_relationship WHERE student_id = 's01';
+
+-- Delete notes associated with the student
+DELETE FROM notes WHERE student_id = 's01';
+
+-- Delete chat messages associated with the student
+DELETE FROM chat WHERE student_id = 's01';
+
+-- Delete annotations associated with the student
+DELETE FROM annotations WHERE student_id = 's01';
+
+-- Now, delete the student from the students table
 DELETE FROM students WHERE id = 's01';
+
+SELECT * FROM inactive_students; 
+DELETE FROM inactive_students;
+
+SELECT * FROM students;
 
 -- Insert availability example for teacher 't01'
 VALUES
   ('t01', 1, '09:00:00', '12:00:00'), -- Segunda-feira, 9h às 12h
   ('t01', 3, '14:00:00', '18:00:00'); -- Quarta-feira, 14h às 18h
+
+-- Inserting annotations associated with students
+-- Replace 't01' and 's01' with the teacher and student IDs, and provide the appropriate annotation text
+INSERT INTO annotations (student_id, teacher_id, annotation) VALUES
+  ('s01', 't01', 'Annotation 1 for Student A'),
+  ('s02', 't01', 'Annotation 1 for Student B'),
+  ('s03', 't01', 'Annotation 1 for Student C');
+
+  -- Insert values into the class table to represent different classes
+INSERT INTO class (id, name, teacher_id) VALUES
+  ('c03', 'English Class', 't01'),
+  ('c04', 'French Class', 't01');
