@@ -45,97 +45,97 @@ app.get("/students", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/students", async (req: Request, res: Response) => {
-  try {
-    const id = req.body.id as string;
-    const name = req.body.name as string;
-    const age = req.body.age as number;
-    const email = req.body.email as string;
-    const telepfone = req.body.telepfone as number;
-    const notes = req.body.notes as string[];
+// app.post("/students", async (req: Request, res: Response) => {
+//   try {
+//     const id = req.body.id as string;
+//     const name = req.body.name as string;
+//     const age = req.body.age as number;
+//     const email = req.body.email as string;
+//     const telepfone = req.body.telepfone as number;
+//     const notes = req.body.notes as string[];
 
-    if (id !== undefined) {
-      if (typeof id !== "string" || id.length < 1) {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error(
-          "'id' deve ser uma string e ser maior que um caractere"
-        );
-      }
-    }
-    if (name !== undefined) {
-      if (typeof name !== "string" || name.length < 2) {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error(
-          "'name' deve ser uma string e ter mais de dois caracteres"
-        );
-      }
-    }
-    if (age !== undefined) {
-      if (typeof age !== "number") {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'age' deve ser uma number");
-      }
-    }
+//     if (id !== undefined) {
+//       if (typeof id !== "string" || id.length < 1) {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error(
+//           "'id' deve ser uma string e ser maior que um caractere"
+//         );
+//       }
+//     }
+//     if (name !== undefined) {
+//       if (typeof name !== "string" || name.length < 2) {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error(
+//           "'name' deve ser uma string e ter mais de dois caracteres"
+//         );
+//       }
+//     }
+//     if (age !== undefined) {
+//       if (typeof age !== "number") {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'age' deve ser uma number");
+//       }
+//     }
 
-    if (email !== undefined) {
-      if (typeof email !== "string") {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'email' deve ser uma string");
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'newEmail' deve ser um email válido");
-      }
-    }
+//     if (email !== undefined) {
+//       if (typeof email !== "string") {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'email' deve ser uma string");
+//       }
+//       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//       if (!emailRegex.test(email)) {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'newEmail' deve ser um email válido");
+//       }
+//     }
 
-    if (telepfone !== undefined) {
-      if (typeof telepfone !== "number") {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'telepfone' deve ser uma number");
-      }
-      const newTelephoneString: string = telepfone.toString();
-      const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
-      //       Pode ou não ter um prefixo de país (código de país) começando com + e seguido por até 4 dígitos.
-      // Pode ou não ter um espaço em branco após o código de país.
-      // Deve ter de 6 a 14 dígitos no número de telefone.
+//     if (telepfone !== undefined) {
+//       if (typeof telepfone !== "number") {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'telepfone' deve ser uma number");
+//       }
+//       const newTelephoneString: string = telepfone.toString();
+//       const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
+//       //       Pode ou não ter um prefixo de país (código de país) começando com + e seguido por até 4 dígitos.
+//       // Pode ou não ter um espaço em branco após o código de país.
+//       // Deve ter de 6 a 14 dígitos no número de telefone.
 
-      if (!phoneRegex.test(newTelephoneString)) {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'newTelephone' deve ser um número de telefone válido");
-      }
-    }
-    if (notes !== undefined) {
-      if (typeof notes !== "string") {
-        res.status(406); // status apropriado para método não aceitável
-        throw new Error("'notes' deve ser uma string");
-      }
-    }
+//       if (!phoneRegex.test(newTelephoneString)) {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'newTelephone' deve ser um número de telefone válido");
+//       }
+//     }
+//     if (notes !== undefined) {
+//       if (typeof notes !== "string") {
+//         res.status(406); // status apropriado para método não aceitável
+//         throw new Error("'notes' deve ser uma string");
+//       }
+//     }
 
-    const newStudent: TStudents = {
-      id,
-      name,
-      age,
-      email,
-      telepfone,
-      notes,
-    };
-    await db("students").insert(newStudent);
-    // students.push(newStudent);
-    res.status(201).send("Cadastro do novo aluno realizado com sucesso");
-  } catch (error) {
-    if (res.statusCode === 200) {
-      // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-      res.status(500); // definimos 500 porque é algo que o servidor não previu
-    }
-    // adicionamos um fluxo de validação do parâmetro 'error'
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
+//     const newStudent: TStudents = {
+//       id,
+//       name,
+//       age,
+//       email,
+//       telepfone,
+//       notes,
+//     };
+//     await db("students").insert(newStudent);
+//     // students.push(newStudent);
+//     res.status(201).send("Cadastro do novo aluno realizado com sucesso");
+//   } catch (error) {
+//     if (res.statusCode === 200) {
+//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
+//       res.status(500); // definimos 500 porque é algo que o servidor não previu
+//     }
+//     // adicionamos um fluxo de validação do parâmetro 'error'
+//     if (error instanceof Error) {
+//       res.send(error.message);
+//     } else {
+//       res.send("Erro inesperado");
+//     }
+//   }
+// });
 
 app.get("/students/:id", async (req: Request, res: Response) => {
   try {
@@ -270,10 +270,7 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
   try {
     const students = await db("students");
     const idToDelete = req.params.id;
-    const [student] = await db
-      .select("*")
-      .from("users")
-      .where({ id: idToDelete });
+    const [student] = await db("students").where({ id: idToDelete });
 
     if (typeof idToDelete !== "string") {
       res.status(406); // status apropriado para método não aceitável
@@ -293,7 +290,7 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
       throw new Error("'id' não encontrada");
     }
 
-    await db.delete().from("students").where({ id: idToDelete });
+    await db("students").del().where({ id: idToDelete });
     // students.splice(studentIndex, 1);
     // res.status(204).send(); esse erro não permite mensagem
     res.status(200).send("Estudante deletado com sucesso.");
