@@ -12,7 +12,7 @@ export type TStudents = {
   email: string;
   phone: number | null;
   age: number | null;
-  notes?: string[];
+  notes?: number[];
   annotations?: string[];
   photo?: TImageData | string | null;
   teacher_id: string;
