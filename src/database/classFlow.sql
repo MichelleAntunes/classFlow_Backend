@@ -142,7 +142,11 @@ VALUES
   ('s01', 'Student A', 'studentA@example.com', 123456789, 20, '', '', 't01', 'c03', x'F1F2F3F4'),
   ('s02', 'Student B', 'studentB@example.com', 987654321, 22, '', '', 't01', 'c03', x'F5F6F7F8'),
   ('s03', 'Student C', 'studentC@example.com', 555666777, 25, '', '', 't01', 'c04', x'F9FAFBFC');
-
+INSERT INTO students (id, name, email, phone, age, notes, annotations, teacher_id, class_id, photo)
+VALUES
+  ('s01', 'Student A', 'studentA@example.com', 123456789, 20, '', '', 't01', 'c03', x'F1F2F3F4'),
+  
+  ('s03', 'Student C', 'studentC@example.com', 555666777, 25, '', '', 't01', 'c04', x'F9FAFBFC');
 
 -- Inserting teacher-student relationships
 INSERT INTO professor_student_relationship (teacher_id, student_id) VALUES

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { TStudents } from "../src/database/types";
+import { TStudents } from "./types";
 import { db } from "../src/database/knex";
 
 const app = express();
