@@ -14,7 +14,7 @@ export type TStudents = {
   age: number | null;
   notes?: string[];
   annotations?: string[];
-  photo?: TImageData | null;
+  photo?: TImageData | string | null;
   teacher_id: string;
   class_id: string;
 };

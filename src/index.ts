@@ -9,19 +9,19 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Configuração de armazenamento
+// Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    // Extração da extensão do arquivo original:
+    // Extraction of the original file extension:
     const extensaoArquivo = file.originalname.split(".")[1];
 
-    // Cria um código randômico que será o nome do arquivo
+    // Creates a random code that will be the name of the file
     const novoNomeArquivo = require("crypto").randomBytes(64).toString("hex");
 
-    // Indica o novo nome do arquivo:
+    // Indicates the new file name:
     cb(null, `${novoNomeArquivo}.${extensaoArquivo}`);
   },
 });
@@ -65,138 +65,152 @@ app.get("/students", async (req: Request, res: Response) => {
   }
 });
 
-// app.post("/students", async (req: Request, res: Response) => {
-//   try {
-//     const {
-//       id,
-//       name,
-//       age,
-//       email,
-//       phone,
-//       notes,
-//       annotations,
-//       teacher_id,
-//       class_id,
-//     } = req.body;
+app.post(
+  "/students",
+  upload.single("photo"),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        id,
+        name,
+        age,
+        email,
+        phone,
+        notes,
+        annotations,
+        teacher_id,
+        class_id,
+      } = req.body;
 
-//     const photoData = req.file?.buffer; // Assumindo que você está usando multer ou outro middleware para upload de arquivo
-//     const mimeType = req.file?.mimetype; // Assumindo que você está usando multer ou outro middleware para upload de arquivo
+      if (id !== undefined) {
+        if (typeof id !== "string" || id.length < 1) {
+          res.status(406); // status apropriado para método não aceitável
+          throw new Error(
+            "'id' deve ser uma string e ser maior que um caractere"
+          );
+        }
+      }
+      if (name !== undefined) {
+        if (typeof name !== "string") {
+          res.status(400);
+          throw new Error("'name' deve ser string");
+        }
 
-//     if (id !== undefined) {
-//       if (typeof id !== "string" || id.length < 1) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'id' deve ser uma string e ser maior que um caractere"
-//         );
-//       }
-//     }
-//     if (name !== undefined) {
-//       if (typeof name !== "string") {
-//         res.status(400);
-//         throw new Error("'name' deve ser string");
-//       }
+        if (name.length < 2) {
+          res.status(400);
+          throw new Error("'name' deve possuir pelo menos 2 caracteres");
+        }
+      }
 
-//       if (name.length < 2) {
-//         res.status(400);
-//         throw new Error("'name' deve possuir pelo menos 2 caracteres");
-//       }
-//     }
+      if (age !== undefined) {
+        if (typeof age !== "number") {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'age' deve ser uma number");
+        }
+      }
 
-//     if (age !== undefined) {
-//       if (typeof age !== "number") {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'age' deve ser uma number");
-//       }
-//     }
+      if (email !== undefined) {
+        if (typeof email !== "string") {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'email' deve ser uma string");
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'newEmail' deve ser um email válido");
+        }
+      }
 
-//     if (email !== undefined) {
-//       if (typeof email !== "string") {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'email' deve ser uma string");
-//       }
-//       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//       if (!emailRegex.test(email)) {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'newEmail' deve ser um email válido");
-//       }
-//     }
+      if (phone !== undefined) {
+        if (typeof phone !== "number") {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'phone' deve ser uma number");
+        }
+        const newTelephoneString: string = phone.toString();
+        const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
+        // May or may not have a country prefix (country code) starting with + and followed by up to 4 digits.
+        // May or may not have a blank space after the country code.
+        // The phone number must have between 6 and 14 digits.
 
-//     if (phone !== undefined) {
-//       if (typeof phone !== "number") {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'phone' deve ser uma number");
-//       }
-//       const newTelephoneString: string = phone.toString();
-//       const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
-//       // May or may not have a country prefix (country code) starting with + and followed by up to 4 digits.
-//       // May or may not have a blank space after the country code.
-//       // The phone number must have between 6 and 14 digits.
+        if (!phoneRegex.test(newTelephoneString)) {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error(
+            "'newTelephone' deve ser um número de telefone válido"
+          );
+        }
+      }
+      if (notes !== undefined) {
+        if (typeof notes !== "string") {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'notes' deve ser uma string");
+        }
+      }
+      if (annotations !== undefined) {
+        if (typeof annotations !== "string") {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error("'annotations' deve ser uma string");
+        }
+      }
+      if (teacher_id !== undefined) {
+        if (typeof teacher_id !== "string" || teacher_id.length < 1) {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error(
+            "'teacher_id' deve ser uma string e ser maior que um caractere"
+          );
+        }
+      }
+      if (class_id !== undefined) {
+        if (typeof class_id !== "string" || class_id.length < 1) {
+          res.status(406); // appropriate status for method not acceptable
+          throw new Error(
+            "'class_id' deve ser uma string e ser maior que um caractere"
+          );
+        }
+      }
 
-//       if (!phoneRegex.test(newTelephoneString)) {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'newTelephone' deve ser um número de telefone válido");
-//       }
-//     }
-//     if (notes !== undefined) {
-//       if (typeof notes !== "string") {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'notes' deve ser uma string");
-//       }
-//     }
-//     if (annotations !== undefined) {
-//       if (typeof annotations !== "string") {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error("'annotations' deve ser uma string");
-//       }
-//     }
-//     if (teacher_id !== undefined) {
-//       if (typeof teacher_id !== "string" || teacher_id.length < 1) {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error(
-//           "'teacher_id' deve ser uma string e ser maior que um caractere"
-//         );
-//       }
-//     }
-//     if (class_id !== undefined) {
-//       if (typeof class_id !== "string" || class_id.length < 1) {
-//         res.status(406); // appropriate status for method not acceptable
-//         throw new Error(
-//           "'class_id' deve ser uma string e ser maior que um caractere"
-//         );
-//       }
-//     }
+      // Logic to process the image if a photo file has been uploaded
+      let photoData: Buffer | undefined;
+      let mimeType: string | undefined;
 
-//     const newStudent: TStudents = {
-//       id,
-//       name,
-//       age,
-//       email,
-//       phone,
-//       notes,
-//       annotations,
-//       photo: {
-//         data: Buffer.from() ,
-//         mimeType: "image/png" ||  "image/jpeg"
-//       },
-//       teacher_id,
-//       class_id,
-//     };
-//     await db("students").insert(newStudent);
-//     // students.push(newStudent);
-//     res.status(201).send("Cadastro do novo aluno realizado com sucesso");
-//   } catch (error) {
-//     if (res.statusCode === 200) {
-//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-//       res.status(500); // definimos 500 porque é algo que o servidor não previu
-//     }
-//     // adicionamos um fluxo de validação do parâmetro 'error'
-//     if (error instanceof Error) {
-//       res.send(error.message);
-//     } else {
-//       res.send("Erro inesperado");
-//     }
-//   }
-// });
+      if (req.file) {
+        photoData = req.file.buffer;
+        mimeType = req.file.mimetype;
+      }
+
+      const newStudent: TStudents = {
+        id,
+        name,
+        age,
+        email,
+        phone,
+        notes,
+        annotations,
+        teacher_id,
+        class_id,
+        photo: photoData
+          ? {
+              data: photoData,
+              mimeType: mimeType as "image/png" | "image/jpeg",
+            }
+          : null,
+      };
+
+      await db("students").insert(newStudent);
+      res.status(201).send("Cadastro do novo aluno realizado com sucesso");
+    } catch (error) {
+      if (res.statusCode === 200) {
+        // if it arrives still worth 200 we know it was an unexpected mistake
+        res.status(500); // we set 500 because it's something the server didn't foresee
+      }
+      // we've added a validation flow for the 'error' parameter
+      if (error instanceof Error) {
+        res.send(error.message);
+      } else {
+        res.send("Erro inesperado");
+      }
+    }
+  }
+);
 
 app.get("/students/:id", async (req: Request, res: Response) => {
   try {
