@@ -47,12 +47,20 @@ app.get("/students", async (req: Request, res: Response) => {
 
 // app.post("/students", async (req: Request, res: Response) => {
 //   try {
-//     const id = req.body.id as string;
-//     const name = req.body.name as string;
-//     const age = req.body.age as number;
-//     const email = req.body.email as string;
-//     const telepfone = req.body.telepfone as number;
-//     const notes = req.body.notes as string[];
+//     const {
+//       id,
+//       name,
+//       age,
+//       email,
+//       phone,
+//       notes,
+//       annotations,
+//       teacher_id,
+//       class_id,
+//     } = req.body;
+
+//     const photoData = req.file?.buffer; // Assumindo que você está usando multer ou outro middleware para upload de arquivo
+//     const mimeType = req.file?.mimetype; // Assumindo que você está usando multer ou outro middleware para upload de arquivo
 
 //     if (id !== undefined) {
 //       if (typeof id !== "string" || id.length < 1) {
@@ -63,52 +71,78 @@ app.get("/students", async (req: Request, res: Response) => {
 //       }
 //     }
 //     if (name !== undefined) {
-//       if (typeof name !== "string" || name.length < 2) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'name' deve ser uma string e ter mais de dois caracteres"
-//         );
+//       if (typeof name !== "string") {
+//         res.status(400);
+//         throw new Error("'name' deve ser string");
+//       }
+
+//       if (name.length < 2) {
+//         res.status(400);
+//         throw new Error("'name' deve possuir pelo menos 2 caracteres");
 //       }
 //     }
+
 //     if (age !== undefined) {
 //       if (typeof age !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
+//         res.status(406); // appropriate status for method not acceptable
 //         throw new Error("'age' deve ser uma number");
 //       }
 //     }
 
 //     if (email !== undefined) {
 //       if (typeof email !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
+//         res.status(406); // appropriate status for method not acceptable
 //         throw new Error("'email' deve ser uma string");
 //       }
 //       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //       if (!emailRegex.test(email)) {
-//         res.status(406); // status apropriado para método não aceitável
+//         res.status(406); // appropriate status for method not acceptable
 //         throw new Error("'newEmail' deve ser um email válido");
 //       }
 //     }
 
-//     if (telepfone !== undefined) {
-//       if (typeof telepfone !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'telepfone' deve ser uma number");
+//     if (phone !== undefined) {
+//       if (typeof phone !== "number") {
+//         res.status(406); // appropriate status for method not acceptable
+//         throw new Error("'phone' deve ser uma number");
 //       }
-//       const newTelephoneString: string = telepfone.toString();
+//       const newTelephoneString: string = phone.toString();
 //       const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
-//       //       Pode ou não ter um prefixo de país (código de país) começando com + e seguido por até 4 dígitos.
-//       // Pode ou não ter um espaço em branco após o código de país.
-//       // Deve ter de 6 a 14 dígitos no número de telefone.
+//       // May or may not have a country prefix (country code) starting with + and followed by up to 4 digits.
+//       // May or may not have a blank space after the country code.
+//       // The phone number must have between 6 and 14 digits.
 
 //       if (!phoneRegex.test(newTelephoneString)) {
-//         res.status(406); // status apropriado para método não aceitável
+//         res.status(406); // appropriate status for method not acceptable
 //         throw new Error("'newTelephone' deve ser um número de telefone válido");
 //       }
 //     }
 //     if (notes !== undefined) {
 //       if (typeof notes !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
+//         res.status(406); // appropriate status for method not acceptable
 //         throw new Error("'notes' deve ser uma string");
+//       }
+//     }
+//     if (annotations !== undefined) {
+//       if (typeof annotations !== "string") {
+//         res.status(406); // appropriate status for method not acceptable
+//         throw new Error("'annotations' deve ser uma string");
+//       }
+//     }
+//     if (teacher_id !== undefined) {
+//       if (typeof teacher_id !== "string" || teacher_id.length < 1) {
+//         res.status(406); // appropriate status for method not acceptable
+//         throw new Error(
+//           "'teacher_id' deve ser uma string e ser maior que um caractere"
+//         );
+//       }
+//     }
+//     if (class_id !== undefined) {
+//       if (typeof class_id !== "string" || class_id.length < 1) {
+//         res.status(406); // appropriate status for method not acceptable
+//         throw new Error(
+//           "'class_id' deve ser uma string e ser maior que um caractere"
+//         );
 //       }
 //     }
 
@@ -117,8 +151,15 @@ app.get("/students", async (req: Request, res: Response) => {
 //       name,
 //       age,
 //       email,
-//       telepfone,
+//       phone,
 //       notes,
+//       annotations,
+//       photo: {
+//         data: Buffer.from() ,
+//         mimeType: "image/png" ||  "image/jpeg"
+//       },
+//       teacher_id,
+//       class_id,
 //     };
 //     await db("students").insert(newStudent);
 //     // students.push(newStudent);
