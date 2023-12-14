@@ -3,6 +3,7 @@ import cors from "cors";
 import { TStudents } from "./types";
 import multer, { Multer } from "multer";
 import { db } from "../src/database/knex";
+import validUrl from "valid-url";
 
 const app = express();
 
@@ -81,6 +82,14 @@ app.post(
         teacher_id,
         class_id,
       } = req.body;
+
+      if (req.body.photo) {
+        const photoUrl = req.body.photo as string;
+        if (!validUrl.isUri(photoUrl)) {
+          res.status(400);
+          throw new Error("A URL da foto não é válida");
+        }
+      }
 
       if (id !== undefined) {
         if (typeof id !== "string" || id.length < 1) {
