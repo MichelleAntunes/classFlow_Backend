@@ -5,14 +5,18 @@ export type TImageData = {
   data: Buffer;
   mimeType: "image/png" | "image/jpeg";
 };
-
+export type TNote = {
+  id: string; // Add a unique identifier for each note
+  note: string;
+  // Add any other fields relevant to the note here
+};
 export type TStudents = {
   id: string;
   name: string;
   email: string;
   phone: number | null;
   age: number | null;
-  notes?: number[];
+  notes?: TNote[]; // Now it's an array of objects
   annotations?: string[];
   photo?: TImageData | string | null;
   teacher_id: string;
