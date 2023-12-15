@@ -481,7 +481,49 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
     }
   }
 });
+app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
+  try {
+    const inactivStudents = await db("inactive_students");
+    const idToDelete = req.params.id;
+    const [inactivStudent] = await db("inactive_students").where({
+      id: idToDelete,
+    });
 
+    if (typeof idToDelete !== "string") {
+      res.status(406); // appropriate status for method not acceptable
+      throw new Error("'idToDelete' deve ser uma string");
+    }
+
+    const studentIndex = inactivStudents.findIndex(
+      (inactivStudent) => inactivStudent.id === idToDelete
+    );
+
+    if (studentIndex === -1) {
+      res.status(404); // appropriate status for not found
+      throw new Error("Estudante não encontrado");
+    }
+    if (!inactivStudent) {
+      res.status(404);
+      throw new Error("'id' não encontrada");
+    }
+
+    await db("inactive_students").del().where({ id: idToDelete });
+    // students.splice(studentIndex, 1);
+    // res.status(204).send(); esse erro não permite mensagem
+    res.status(200).send("Estudante deletado com sucesso.");
+  } catch (error) {
+    if (res.statusCode === 200) {
+      // if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); //we set 500 because it's something the server didn't foresee
+    }
+    // we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
 // app.post("/notes/:id/:teacher_id", async (req: Request, res: Response) => {
 //   try {
 //     const student_id = req.params.id;
