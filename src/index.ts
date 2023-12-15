@@ -12,6 +12,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Function to generate the password hash
+const generateHashedPassword = async (password: string): Promise<string> => {
+  const saltRounds = 10; // Número de rounds para o processo de hash
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+};
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -35,38 +41,75 @@ app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003");
 });
 
-//  Rota de login
-app.post("/login", async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
+// app.post("/register", async (req: Request, res: Response) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    // Verificar se o e-mail existe na base de dados
-    const teacher = await db("teacher").where({ email }).first();
+//     if (!name || !email || !password) {
+//       res.status(400).send("Nome, e-mail e senha são obrigatórios");
+//       return;
+//     }
 
-    if (!teacher) {
-      res.status(401).send("Credenciais inválidas");
-      return;
-    }
+//     const existingTeacher = await db("teacher").where({ email }).first();
 
-    // Compare the supplied password with the stored password (using bcrypt)
-    const passwordMatch = await bcrypt.compare(password, teacher.password);
+//     if (existingTeacher) {
+//       res.status(409).send("Professor já cadastrado");
+//       return;
+//     }
 
-    if (!passwordMatch) {
-      res.status(401).send("Credenciais inválidas");
-      return;
-    }
+//     const hashedPassword = await generateHashedPassword(password);
 
-    // Here you can generate an authentication token (JWT, for example) if you wish
-    // Return the token or another success response
-    res.status(200).send("Login bem-sucedido");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro interno do servidor");
-  }
-});
+//     await db("teacher").insert({
+//       name,
+//       email,
+//       password: hashedPassword,
+//     });
+
+//     res.status(201).send("Professor cadastrado com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro interno do servidor");
+//   }
+// });
+
+// Rota para login de professor
+// app.post("/login", async (req: Request, res: Response) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       res.status(400).send("E-mail e senha são obrigatórios");
+//       return;
+//     }
+
+//     const teacher = await db("teacher").where({ email }).first();
+//     console.log("Senha do banco de dados:", teacher.password);
+//     console.log("Senha fornecida:", password);
+//     if (!teacher) {
+//       console.log("Professor não encontrado para o e-mail fornecido");
+//       res.status(401).send("Credenciais inválidas");
+//       return;
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, teacher.password);
+
+//     if (!passwordMatch) {
+//       console.log("Senha incorreta");
+//       res.status(401).send("Credenciais inválidas");
+//       return;
+//     }
+
+//     console.log("Login bem-sucedido");
+//     res.status(200).send("Login bem-sucedido");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro interno do servidor");
+//   }
+// });
 
 // Rota para redefinir a senha (o professor deve estar autenticado)
-//  app.post('/reset-password', async (req: Request, res: Response) => {
+//
+// app.post('/reset-password', async (req: Request, res: Response) => {
 //    try {
 //      const { teacher_id, newPassword } = req.body;
 
@@ -571,6 +614,58 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
     }
   }
 });
+
+// app.post("/annotations/:id", async (req: Request, res: Response) => {
+//   try {
+//     const studentId = req.params.id;
+//     const { annotation } = req.body;
+
+//     if (typeof studentId !== "string" || studentId.length === 0) {
+//       res.status(422).send("'studentId' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     if (typeof annotation !== "string" || annotation.length === 0) {
+//       res.status(422).send("'annotation' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     // Verifica se o aluno existe
+//     const existingStudent = await db("students").where("id", studentId).first();
+
+//     if (!existingStudent) {
+//       res.status(404).send("Estudante não encontrado");
+//       return;
+//     }
+
+//     const newAnnotations = {
+//       id: "nota_id",
+//       annotations: annotation,
+//     };
+
+//     const updatedaAnotations = existingStudent.annotations
+//       ? [...existingStudent.annotations, newAnnotations]
+//       : [newAnnotations];
+
+//     // Atualiza o campo notes do estudante
+//     await db("students").where("id", studentId).update({
+//       annotations: updatedaAnotations,
+//     });
+
+//     // Insere a nota na tabela notes
+//     await db("annotations").insert({
+//       student_id: studentId,
+//       teacher_id: existingStudent.teacher_id,
+//       annotation: annotation,
+//     });
+
+//     res.status(200).send("Nova nota adicionada com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro inesperado");
+//   }
+// });
+
 app.post("/notes/:id", async (req: Request, res: Response) => {
   try {
     const studentId = req.params.id;
@@ -621,3 +716,40 @@ app.post("/notes/:id", async (req: Request, res: Response) => {
     res.status(500).send("Erro inesperado");
   }
 });
+
+// app.put("/teacher/:id", async (req: Request, res: Response) => {
+//   try {
+//     const teacherId = req.params.id;
+//     const { name, email, password } = req.body;
+
+//     // Verifica se o ID do professor é uma string não vazia
+//     if (typeof teacherId !== "string" || teacherId.length === 0) {
+//       res.status(422).send("'teacherId' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     // Verifica se o professor existe
+//     const existingTeacher = await db("teacher").where("id", teacherId).first();
+
+//     if (!existingTeacher) {
+//       res.status(404).send("Professor não encontrado");
+//       return;
+//     }
+
+//     // Atualiza as informações do professor
+//     const updatedTeacher = {
+//       name: name || existingTeacher.name,
+//       email: email || existingTeacher.email,
+//       // Se a senha foi fornecida, gere o hash
+//       password: password ? await bcrypt.hash(password, 10) : existingTeacher.password,
+//     };
+
+//     // Atualiza o professor no banco de dados
+//     await db("teacher").where("id", teacherId).update(updatedTeacher);
+
+//     res.status(200).send("Perfil do professor atualizado com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro interno do servidor");
+//   }
+// });

@@ -12,14 +12,20 @@ export type TNote = {
   // Add any other fields relevant to the note here
 };
 
+export type TAnnotation = {
+  id: string; // Add a unique identifier for each note
+  annotations: string;
+  // Add any other fields relevant to the note here
+};
+
 export type TStudents = {
   id: string;
   name: string;
   email: string;
   phone: number | null;
   age: number | null;
-  notes?: TNote[]; // Now it's an array of objects
-  annotations?: string[];
+  notes?: TNote[]; // Array of note objects
+  annotations?: TAnnotation[]; // Array of annotation objects
   photo?: TImageData | string | null;
   teacher_id: string;
   class_id: string;
