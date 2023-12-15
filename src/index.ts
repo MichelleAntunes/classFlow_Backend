@@ -5,6 +5,7 @@ import multer, { Multer } from "multer";
 import { db } from "../src/database/knex";
 import validUrl from "valid-url";
 import * as bcrypt from "bcrypt";
+import { TNote } from "./types";
 
 const app = express();
 
@@ -524,49 +525,53 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
     }
   }
 });
-// app.post("/notes/:id", async (req: Request, res: Response) => {
-//   try {
-//     const studentId = req.params.id;
-//     const { note } = req.body;
+app.post("/notes/:id", async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.id;
+    const { note } = req.body;
 
-//     if (typeof studentId !== "string" || studentId.length === 0) {
-//       res.status(422).send("'studentId' deve ser uma string não vazia");
-//       return;
-//     }
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      res.status(422).send("'studentId' deve ser uma string não vazia");
+      return;
+    }
 
-//     if (typeof note !== "string" || note.length === 0) {
-//       res.status(422).send("'note' deve ser uma string não vazia");
-//       return;
-//     }
+    if (typeof note !== "string" || note.length === 0) {
+      res.status(422).send("'note' deve ser uma string não vazia");
+      return;
+    }
 
-//     // Verifica se o aluno existe
-//     const existingStudent = await db("students").where("id", studentId).first();
+    // Verifica se o aluno existe
+    const existingStudent = await db("students").where("id", studentId).first();
 
-//     if (!existingStudent) {
-//       res.status(404).send("Estudante não encontrado");
-//       return;
-//     }
+    if (!existingStudent) {
+      res.status(404).send("Estudante não encontrado");
+      return;
+    }
 
-//     // Atualiza a nota e adiciona a nova nota
-//     const updatedNotes = existingStudent.notes
-//       ? `${existingStudent.notes}\n${note}`
-//       : note;
+    const newNote: TNote = {
+      id: "nota_id",
+      note: note,
+    };
 
-//     // Atualiza o campo notes do estudante
-//     await db("students").where("id", studentId).update({
-//       notes: updatedNotes,
-//     });
+    const updatedNotes = existingStudent.notes
+      ? [...existingStudent.notes, newNote]
+      : [newNote];
 
-//     // Insere a nota na tabela notes
-//     await db("notes").insert({
-//       student_id: studentId,
-//       teacher_id: existingStudent.teacher_id,
-//       note: note,
-//     });
+    // Atualiza o campo notes do estudante
+    await db("students").where("id", studentId).update({
+      notes: updatedNotes,
+    });
 
-//     res.status(200).send("Nova nota adicionada com sucesso");
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Erro inesperado");
-//   }
-// });
+    // Insere a nota na tabela notes
+    await db("notes").insert({
+      student_id: studentId,
+      teacher_id: existingStudent.teacher_id,
+      note: note,
+    });
+
+    res.status(200).send("Nova nota adicionada com sucesso");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
