@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { TStudents } from "./types";
+import { TImageData, TStudents } from "./types";
 import multer, { Multer } from "multer";
 import { db } from "../src/database/knex";
 import validUrl from "valid-url";
@@ -344,102 +344,148 @@ app.get("/students/:id", async (req: Request, res: Response) => {
   }
 });
 // //edit
-// app.put("/students/:id", (req: Request, res: Response) => {
-//   try {
-//     const idToEdit = req.params.id;
+app.put("/students/:id", async (req: Request, res: Response) => {
+  try {
+    const idToEdit = req.params.id;
+    const students = await db("students");
+    if (typeof idToEdit !== "string") {
+      res.status(406); // status apropriado para método não aceitável
+      throw new Error("'id' deve ser uma string");
+    }
+    const student = students.find((student) => student.id === idToEdit);
 
-//     if (typeof idToEdit !== "string") {
-//       res.status(406); // status apropriado para método não aceitável
-//       throw new Error("'id' deve ser uma string");
-//     }
+    if (!student) {
+      res.status(404); // status apropriado para não encontrado
+      throw new Error("Estudante não encontrado");
+    }
 
-//     const student = students.find((student) => student.id === idToEdit);
+    const newId = req.body.id as string | undefined;
+    const newName = req.body.name as string | undefined;
+    const newEmail = req.body.email as string | undefined;
+    const newPhone = req.body.phone as number | undefined;
+    const newAge = req.body.age as number | undefined;
+    // const newNotes = req.body.notes as TNote[] | undefined;
+    // const newAnnotations = req.body.annotations as string[] | undefined;
+    const newPhoto = req.body.photo as TImageData | string | null;
+    const newTeacherId = req.body.teacher_id as string | undefined;
+    const newClassId = req.body.class_id as string | undefined;
 
-//     if (!student) {
-//       res.status(404); // status apropriado para não encontrado
-//       throw new Error("Estudante não encontrado");
-//     }
+    if (newId !== undefined) {
+      if (typeof newId !== "string" || newId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newTeacherId !== undefined) {
+      if (typeof newTeacherId !== "string" || newTeacherId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newTeacherId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newClassId !== undefined) {
+      if (typeof newClassId !== "string" || newClassId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newClassId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newPhoto !== undefined) {
+      if (
+        typeof newPhoto !== "string" ||
+        newPhoto.length < 1 ||
+        !(typeof newPhoto === "string" || Buffer.isBuffer(newPhoto))
+      ) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error(
+          "'newPhoto' deve ser uma string ou um buffer e ter pelo menos um caractere"
+        );
+      }
+    }
+    // if (newAnnotations !== undefined) {
+    //   if (
+    //     typeof newAnnotations !== "string" ||
+    //     (newAnnotations as string).length < 1
+    //   ) {
+    //     res.status(406); // appropriate status for non-acceptable method
+    //     throw new Error(
+    //       "'newAnnotations' deve ser uma string e ter pelo menos um caractere"
+    //     );
+    //   }
+    // }
 
-//     const newId = req.body.id as string | undefined;
-//     const newName = req.body.name as string | undefined;
-//     const newEmail = req.body.email as string | undefined;
-//     const newAge = req.body.age as number | undefined;
-//     const newTelephone = req.body.telephone as number | undefined;
-//     const newNotes = req.body.notes as string[] | undefined;
+    if (newName !== undefined) {
+      if (typeof newName !== "string" || newName.length < 2) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error(
+          "'newName' deve ser uma string e ter pelo menos dois caracteres"
+        );
+      }
+    }
 
-//     if (newId !== undefined) {
-//       if (typeof newId !== "string" || newId.length < 1) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'newId' deve ser uma string e ter pelo menos um caractere"
-//         );
-//       }
-//     }
+    if (newEmail !== undefined) {
+      if (typeof newEmail !== "string") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newEmail' deve ser uma string");
+      }
 
-//     if (newName !== undefined) {
-//       if (typeof newName !== "string" || newName.length < 2) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'newName' deve ser uma string e ter pelo menos dois caracteres"
-//         );
-//       }
-//     }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newEmail' deve ser um email válido");
+      }
+    }
+    if (newAge !== undefined) {
+      if (typeof newAge !== "number") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newAge' deve ser um número");
+      }
+    }
 
-//     if (newEmail !== undefined) {
-//       if (typeof newEmail !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newEmail' deve ser uma string");
-//       }
+    if (newPhone !== undefined) {
+      if (typeof newPhone !== "number") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newPhone' deve ser um número");
+      }
 
-//       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//       if (!emailRegex.test(newEmail)) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newEmail' deve ser um email válido");
-//       }
-//     }
-//     if (newAge !== undefined) {
-//       if (typeof newAge !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newAge' deve ser um número");
-//       }
-//     }
+      const newPhoneString: string = newPhone.toString();
+      const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
 
-//     if (newTelephone !== undefined) {
-//       if (typeof newTelephone !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newTelephone' deve ser um número");
-//       }
+      if (!phoneRegex.test(newPhoneString)) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newPhone' deve ser um número de telefone válido");
+      }
+    }
 
-//       const newTelephoneString: string = newTelephone.toString();
-//       const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
+    // if (newNotes !== undefined) {
+    //   if (
+    //     !Array.isArray(newNotes) ||
+    //     newNotes.length === 0 ||
+    //     !newNotes.every((note) => typeof note === "string")
+    //   ) {
+    //     res.status(406); // appropriate status for non-acceptable method
+    //     throw new Error("'newNotes' deve ser um array não vazio de strings");
+    //   }
+    // }
 
-//       if (!phoneRegex.test(newTelephoneString)) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newTelephone' deve ser um número de telefone válido");
-//       }
-//     }
-
-//     if (newNotes !== undefined) {
-//       if (typeof newNotes !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newNotes' deve ser uma string");
-//       }
-//     }
-
-//     res.status(200).send("Atualização realizada com sucesso");
-//   } catch (error) {
-//     if (res.statusCode === 200) {
-//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-//       res.status(500); // definimos 500 porque é algo que o servidor não previu
-//     }
-//     // adicionamos um fluxo de validação do parâmetro 'error'
-//     if (error instanceof Error) {
-//       res.send(error.message);
-//     } else {
-//       res.send("Erro inesperado");
-//     }
-//   }
-// });
+    res.status(200).send("Atualização realizada com sucesso");
+  } catch (error) {
+    if (res.statusCode === 200) {
+      // if it arrives still worth 200 we know it was an unexpected error
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    // add a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
 
 app.delete("/students/:id", async (req: Request, res: Response) => {
   try {
