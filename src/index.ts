@@ -524,55 +524,49 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
     }
   }
 });
-// app.post("/notes/:id/:teacher_id", async (req: Request, res: Response) => {
+// app.post("/notes/:id", async (req: Request, res: Response) => {
 //   try {
-//     const student_id = req.params.id;
-//     const teacher_id = req.params.teacher_id;
-//     const newNotes = req.body.notes as string;
-//     const students = await db("students");
+//     const studentId = req.params.id;
+//     const { note } = req.body;
 
-//     if (typeof student_id !== "string") {
-//       res.status(406); // appropriate tatus for unacceptable method
-//       throw new Error("'student_id' deve ser uma string");
-//     }
-//     if (typeof newNotes !== "string") {
-//       res.status(406); // appropriate tatus for unacceptable method
-//       throw new Error("'newNotes' deve ser uma string");
-//     }
-//     if (typeof teacher_id !== "string") {
-//       res.status(406); // appropriate tatus for unacceptable method
-//       throw new Error("'teacher_id' deve ser uma string");
-//     }
-//     const resultStudent = students.find((student) => student.id === student_id);
-
-//     if (!resultStudent) {
-//       res.status(404); // appropriate status for not found
-//       throw new Error("Estudante não encontrado");
+//     if (typeof studentId !== "string" || studentId.length === 0) {
+//       res.status(422).send("'studentId' deve ser uma string não vazia");
+//       return;
 //     }
 
-//     // if (resultStudent) {
-//     //   resultStudent.notes = Array.isArray(resultStudent.notes)
-//     //     ? resultStudent.notes
-//     //     : [resultStudent.notes];
-//     //   await db("students").push(newNotes);
+//     if (typeof note !== "string" || note.length === 0) {
+//       res.status(422).send("'note' deve ser uma string não vazia");
+//       return;
+//     }
 
-//     // }
-//     await db("notes").insert({
-//       student_id,
-//       teacher_id,
-//       notes: newNotes,
+//     // Verifica se o aluno existe
+//     const existingStudent = await db("students").where("id", studentId).first();
+
+//     if (!existingStudent) {
+//       res.status(404).send("Estudante não encontrado");
+//       return;
+//     }
+
+//     // Atualiza a nota e adiciona a nova nota
+//     const updatedNotes = existingStudent.notes
+//       ? `${existingStudent.notes}\n${note}`
+//       : note;
+
+//     // Atualiza o campo notes do estudante
+//     await db("students").where("id", studentId).update({
+//       notes: updatedNotes,
 //     });
-//     res.status(200).send("Novo comentário adicionado comsucesso");
+
+//     // Insere a nota na tabela notes
+//     await db("notes").insert({
+//       student_id: studentId,
+//       teacher_id: existingStudent.teacher_id,
+//       note: note,
+//     });
+
+//     res.status(200).send("Nova nota adicionada com sucesso");
 //   } catch (error) {
-//     if (res.statusCode === 200) {
-//       // if it arrives still worth 200 we know it was an unexpected mistake
-//       res.status(500); // we set 500 because it's something the server didn't foresee
-//     }
-//     // we've added a validation flow for the 'error' parameter
-//     if (error instanceof Error) {
-//       res.send(error.message);
-//     } else {
-//       res.send("Erro inesperado");
-//     }
+//     console.error(error);
+//     res.status(500).send("Erro inesperado");
 //   }
 // });
