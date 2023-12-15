@@ -4,6 +4,7 @@ import { TStudents } from "./types";
 import multer, { Multer } from "multer";
 import { db } from "../src/database/knex";
 import validUrl from "valid-url";
+import * as bcrypt from "bcrypt";
 
 const app = express();
 
@@ -33,6 +34,62 @@ app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003");
 });
 
+//  Rota de login
+app.post("/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Verificar se o e-mail existe na base de dados
+    const teacher = await db("teacher").where({ email }).first();
+
+    if (!teacher) {
+      res.status(401).send("Credenciais inválidas");
+      return;
+    }
+
+    // Compare the supplied password with the stored password (using bcrypt)
+    const passwordMatch = await bcrypt.compare(password, teacher.password);
+
+    if (!passwordMatch) {
+      res.status(401).send("Credenciais inválidas");
+      return;
+    }
+
+    // Here you can generate an authentication token (JWT, for example) if you wish
+    // Return the token or another success response
+    res.status(200).send("Login bem-sucedido");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro interno do servidor");
+  }
+});
+
+// Rota para redefinir a senha (o professor deve estar autenticado)
+//  app.post('/reset-password', async (req: Request, res: Response) => {
+//    try {
+//      const { teacher_id, newPassword } = req.body;
+
+//       // Verificar se o professor existe na base de dados
+//      const teacher = await db('teacher').where({ id: teacher_id }).first();
+
+//      if (!teacher) {
+//        res.status(404).send('Professor não encontrado');
+//        return;
+//      }
+
+//       // Criptografar a nova senha antes de salvar no banco de dados
+//      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//       // Atualizar a senha na base de dados
+//      await db('teacher').where({ id: teacher_id }).update({ password: hashedPassword });
+
+//      res.status(200).send('Senha redefinida com sucesso');
+//    } catch (error) {
+//      console.error(error);
+//      res.status(500).send('Erro interno do servidor');
+//    }
+//  });
+
 app.get("/students", async (req: Request, res: Response) => {
   try {
     const nameToFind = req.query.name as string;
@@ -51,6 +108,39 @@ app.get("/students", async (req: Request, res: Response) => {
       res.status(200).send(result);
     } else {
       res.status(200).send(students);
+    }
+  } catch (error) {
+    if (res.statusCode === 200) {
+      //if  it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    //we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
+
+app.get("/inactivStudents", async (req: Request, res: Response) => {
+  try {
+    const nameToFind = req.query.name as string;
+    const inactivStudents = await db("inactive_students");
+
+    if (nameToFind) {
+      const result: TStudents[] = inactivStudents.filter((inactivStudent) =>
+        inactivStudent.name.toLowerCase().includes(nameToFind.toLowerCase())
+      );
+
+      if (result.length === 0) {
+        res.status(404); // Appropriate status for not found
+        throw new Error("Estudante inativo não encontrado");
+      }
+
+      res.status(200).send(result);
+    } else {
+      res.status(200).send(inactivStudents);
     }
   } catch (error) {
     if (res.statusCode === 200) {
