@@ -6,6 +6,7 @@ import { db } from "../src/database/knex";
 import validUrl from "valid-url";
 import * as bcrypt from "bcrypt";
 import { TNote } from "./types";
+import { TAnnotation } from "./types";
 
 const app = express();
 
@@ -166,7 +167,6 @@ app.get("/students", async (req: Request, res: Response) => {
     }
   }
 });
-
 app.get("/inactivStudents", async (req: Request, res: Response) => {
   try {
     const nameToFind = req.query.name as string;
@@ -199,7 +199,69 @@ app.get("/inactivStudents", async (req: Request, res: Response) => {
     }
   }
 });
+app.get("/notes", async (req: Request, res: Response) => {
+  try {
+    // Retrieves all notes from the database
+    const allNotes = await db("notes");
 
+    // Returns a list of all notes
+    res.status(200).json(allNotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+app.get("/notes/:studentId", async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.studentId;
+
+    // Checks if studentId is a non-empty string
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      res.status(422).send("'studentId' deve ser uma string não vazia");
+      return;
+    }
+
+    // Retrieves all grades from the database for a specific student
+    const studentNotes = await db("notes").where("student_id", studentId);
+
+    // Returns the list of grades for the specific student
+    res.status(200).json(studentNotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+app.get("/students/:id", async (req: Request, res: Response) => {
+  try {
+    //:id could be any other necessary filter
+    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
+    const students = await db("students");
+    if (typeof idToFind !== "string") {
+      res.status(406); // appropriate status for method not acceptable
+      throw new Error("'idToFind' deve ser uma string");
+    }
+
+    const result = students.find((student) => student.id === idToFind);
+
+    if (!result) {
+      res.status(404); // appropriate status for not found
+      throw new Error("Estudante não encontrado");
+    }
+    res.status(200).send(result);
+    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
+  } catch (error) {
+    if (res.statusCode === 200) {
+      //if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    // we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
 app.post(
   "/students",
   upload.single("photo"),
@@ -354,39 +416,6 @@ app.post(
     }
   }
 );
-
-app.get("/students/:id", async (req: Request, res: Response) => {
-  try {
-    //:id could be any other necessary filter
-    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
-    const students = await db("students");
-    if (typeof idToFind !== "string") {
-      res.status(406); // appropriate status for method not acceptable
-      throw new Error("'idToFind' deve ser uma string");
-    }
-
-    const result = students.find((student) => student.id === idToFind);
-
-    if (!result) {
-      res.status(404); // appropriate status for not found
-      throw new Error("Estudante não encontrado");
-    }
-    res.status(200).send(result);
-    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
-  } catch (error) {
-    if (res.statusCode === 200) {
-      //if it arrives still worth 200 we know it was an unexpected mistake
-      res.status(500); // we set 500 because it's something the server didn't foresee
-    }
-    // we've added a validation flow for the 'error' parameter
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
-// //edit
 app.put("/students/:id", async (req: Request, res: Response) => {
   try {
     const idToEdit = req.params.id;
@@ -407,8 +436,6 @@ app.put("/students/:id", async (req: Request, res: Response) => {
     const newEmail = req.body.email as string | undefined;
     const newPhone = req.body.phone as number | undefined;
     const newAge = req.body.age as number | undefined;
-    // const newNotes = req.body.notes as TNote[] | undefined;
-    // const newAnnotations = req.body.annotations as string[] | undefined;
     const newPhoto = req.body.photo as TImageData | string | null;
     const newTeacherId = req.body.teacher_id as string | undefined;
     const newClassId = req.body.class_id as string | undefined;
@@ -449,17 +476,6 @@ app.put("/students/:id", async (req: Request, res: Response) => {
         );
       }
     }
-    // if (newAnnotations !== undefined) {
-    //   if (
-    //     typeof newAnnotations !== "string" ||
-    //     (newAnnotations as string).length < 1
-    //   ) {
-    //     res.status(406); // appropriate status for non-acceptable method
-    //     throw new Error(
-    //       "'newAnnotations' deve ser uma string e ter pelo menos um caractere"
-    //     );
-    //   }
-    // }
 
     if (newName !== undefined) {
       if (typeof newName !== "string" || newName.length < 2) {
@@ -503,18 +519,16 @@ app.put("/students/:id", async (req: Request, res: Response) => {
         throw new Error("'newPhone' deve ser um número de telefone válido");
       }
     }
-
-    // if (newNotes !== undefined) {
-    //   if (
-    //     !Array.isArray(newNotes) ||
-    //     newNotes.length === 0 ||
-    //     !newNotes.every((note) => typeof note === "string")
-    //   ) {
-    //     res.status(406); // appropriate status for non-acceptable method
-    //     throw new Error("'newNotes' deve ser um array não vazio de strings");
-    //   }
-    // }
-
+    const updatedStudentData = {
+      name: newName || student.name,
+      email: newEmail || student.email,
+      phone: newPhone || student.phone,
+      age: newAge || student.age,
+      photo: newPhoto || student.photo,
+      teacher_id: newTeacherId || student.teacher_id,
+      class_id: newClassId || student.class_id,
+    };
+    await db("students").where("id", idToEdit).update(updatedStudentData);
     res.status(200).send("Atualização realizada com sucesso");
   } catch (error) {
     if (res.statusCode === 200) {
@@ -529,7 +543,50 @@ app.put("/students/:id", async (req: Request, res: Response) => {
     }
   }
 });
+app.put("/notes/:id", async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.id;
+    const newNote = req.body.note;
+    console.log(newNote);
+    console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      res.status(422).send("'studentId' deve ser uma string não vazia");
+      return;
+    }
+
+    if (typeof newNote !== "string" || newNote.length === 0) {
+      res.status(422).send("'note' deve ser uma string não vazia");
+      return;
+    }
+
+    const existingStudent = await db("students").where("id", studentId).first();
+
+    if (!existingStudent) {
+      res.status(404).send("Estudante não encontrado");
+      return;
+    }
+
+    const noteId = await db("notes").insert({
+      student_id: studentId,
+      teacher_id: existingStudent.teacher_id,
+      note: newNote,
+    });
+
+    const updatedNotes = existingStudent.notes
+      ? [...existingStudent.notes, { id: noteId[0], note: newNote }]
+      : [{ id: noteId[0], note: newNote }];
+
+    await db("students").where("id", studentId).update({
+      notes: updatedNotes,
+    });
+
+    res.status(200).send("Atualização da nota realizada com sucesso");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
 app.delete("/students/:id", async (req: Request, res: Response) => {
   try {
     const students = await db("students");
@@ -614,23 +671,48 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
     }
   }
 });
+app.delete("/notes/:id", async (req: Request, res: Response) => {
+  try {
+    const noteId = req.params.id;
 
-// app.post("/annotations/:id", async (req: Request, res: Response) => {
+    // Checks if noteId is a non-empty string
+    if (typeof noteId !== "string" || noteId.length === 0) {
+      res.status(422).send("'noteId' deve ser uma string não vazia");
+      return;
+    }
+
+    // Deletes the note from the database
+    const deletedRows = await db("notes").where("id", noteId).del();
+
+    // Checks if the note was found and deleted
+    if (deletedRows === 0) {
+      res.status(404).send("Nota não encontrada");
+    } else {
+      res.status(200).send("Nota deletada com sucesso");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+
+// app.put("/annotations/:id", async (req: Request, res: Response) => {
 //   try {
 //     const studentId = req.params.id;
-//     const { annotation } = req.body;
+//     const newAnnotation = req.body.annotation;
+
+//     console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
 //     if (typeof studentId !== "string" || studentId.length === 0) {
 //       res.status(422).send("'studentId' deve ser uma string não vazia");
 //       return;
 //     }
 
-//     if (typeof annotation !== "string" || annotation.length === 0) {
+//     if (typeof newAnnotation !== "string" || newAnnotation.length === 0) {
 //       res.status(422).send("'annotation' deve ser uma string não vazia");
 //       return;
 //     }
 
-//     // Verifica se o aluno existe
 //     const existingStudent = await db("students").where("id", studentId).first();
 
 //     if (!existingStudent) {
@@ -638,118 +720,30 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
 //       return;
 //     }
 
-//     const newAnnotations = {
-//       id: "nota_id",
-//       annotations: annotation,
-//     };
-
-//     const updatedaAnotations = existingStudent.annotations
-//       ? [...existingStudent.annotations, newAnnotations]
-//       : [newAnnotations];
-
-//     // Atualiza o campo notes do estudante
-//     await db("students").where("id", studentId).update({
-//       annotations: updatedaAnotations,
-//     });
-
-//     // Insere a nota na tabela notes
-//     await db("annotations").insert({
+//     // Inserir a nova anotação na tabela de anotações
+//     const [annotationId] = await db("annotations").insert({
 //       student_id: studentId,
 //       teacher_id: existingStudent.teacher_id,
-//       annotation: annotation,
+//       annotation: newAnnotation,
 //     });
 
-//     res.status(200).send("Nova nota adicionada com sucesso");
+//     // Atualizar as anotações do estudante, mantendo as existentes
+//     const updatedAnnotations = existingStudent.annotations
+//       ? [
+//           ...existingStudent.annotations,
+//           { id: annotationId, annotation: newAnnotation },
+//         ]
+//       : [{ id: annotationId, annotation: newAnnotation }];
+
+//     await db("students")
+//       .where("id", studentId)
+//       .update({
+//         annotations: JSON.stringify(updatedAnnotations),
+//       });
+
+//     res.status(200).send("Nova anotação adicionada com sucesso");
 //   } catch (error) {
 //     console.error(error);
 //     res.status(500).send("Erro inesperado");
-//   }
-// });
-
-app.post("/notes/:id", async (req: Request, res: Response) => {
-  try {
-    const studentId = req.params.id;
-    const { note } = req.body;
-
-    if (typeof studentId !== "string" || studentId.length === 0) {
-      res.status(422).send("'studentId' deve ser uma string não vazia");
-      return;
-    }
-
-    if (typeof note !== "string" || note.length === 0) {
-      res.status(422).send("'note' deve ser uma string não vazia");
-      return;
-    }
-
-    // Verifica se o aluno existe
-    const existingStudent = await db("students").where("id", studentId).first();
-
-    if (!existingStudent) {
-      res.status(404).send("Estudante não encontrado");
-      return;
-    }
-
-    const newNote: TNote = {
-      id: "nota_id",
-      note: note,
-    };
-
-    const updatedNotes = existingStudent.notes
-      ? [...existingStudent.notes, newNote]
-      : [newNote];
-
-    // Atualiza o campo notes do estudante
-    await db("students").where("id", studentId).update({
-      notes: updatedNotes,
-    });
-
-    // Insere a nota na tabela notes
-    await db("notes").insert({
-      student_id: studentId,
-      teacher_id: existingStudent.teacher_id,
-      note: note,
-    });
-
-    res.status(200).send("Nova nota adicionada com sucesso");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro inesperado");
-  }
-});
-
-// app.put("/teacher/:id", async (req: Request, res: Response) => {
-//   try {
-//     const teacherId = req.params.id;
-//     const { name, email, password } = req.body;
-
-//     // Verifica se o ID do professor é uma string não vazia
-//     if (typeof teacherId !== "string" || teacherId.length === 0) {
-//       res.status(422).send("'teacherId' deve ser uma string não vazia");
-//       return;
-//     }
-
-//     // Verifica se o professor existe
-//     const existingTeacher = await db("teacher").where("id", teacherId).first();
-
-//     if (!existingTeacher) {
-//       res.status(404).send("Professor não encontrado");
-//       return;
-//     }
-
-//     // Atualiza as informações do professor
-//     const updatedTeacher = {
-//       name: name || existingTeacher.name,
-//       email: email || existingTeacher.email,
-//       // Se a senha foi fornecida, gere o hash
-//       password: password ? await bcrypt.hash(password, 10) : existingTeacher.password,
-//     };
-
-//     // Atualiza o professor no banco de dados
-//     await db("teacher").where("id", teacherId).update(updatedTeacher);
-
-//     res.status(200).send("Perfil do professor atualizado com sucesso");
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Erro interno do servidor");
 //   }
 // });

@@ -14,8 +14,8 @@ export type TNote = {
 
 export type TAnnotation = {
   id: string; // Add a unique identifier for each note
-  annotations: string;
-  // Add any other fields relevant to the note here
+  annotation: string;
+  // Add any other fields relevant to the annotations here
 };
 
 export type TStudents = {

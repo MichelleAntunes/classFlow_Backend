@@ -36,6 +36,20 @@ CREATE TABLE students (
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
   
 );
+-- CREATE TABLE students (
+--   id TEXT PRIMARY KEY NOT NULL,
+--   name TEXT NOT NULL,
+--   email TEXT UNIQUE NOT NULL,
+--   phone INTEGER,
+--   age INTEGER,
+--   notes JSON DEFAULT '[]', -- JSON array as the default value
+--   annotations JSON DEFAULT '[]', -- JSON array as the default value
+--   photo BLOB DEFAULT x'F1F2F3F4',
+--   teacher_id TEXT NOT NULL,
+--   class_id TEXT NOT NULL,
+--   FOREIGN KEY (class_id) REFERENCES class (id),
+--   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+-- );
 
 -- Table professor_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
 CREATE TABLE professor_student_relationship (
@@ -159,6 +173,10 @@ INSERT INTO notes (student_id, teacher_id, note) VALUES
   ('s01', 't01', 'Note 1 for Student A'),
   ('s02', 't01', 'Note 1 for Student B'),
   ('s03', 't01', 'Note 1 for Student C');
+  SELECT * FROM notes;
+
+SELECT * FROM annotations;
+
 
   -- Inserting annotations associated with students
 -- Replace 't01' and 's01' with the teacher and student IDs, and provide the appropriate annotation text
