@@ -1,16 +1,24 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { TStudents } from "./types";
+import { TImageData, TStudents } from "./types";
 import multer, { Multer } from "multer";
 import { db } from "../src/database/knex";
 import validUrl from "valid-url";
 import * as bcrypt from "bcrypt";
+import { TNote } from "./types";
+import { TAnnotation } from "./types";
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
+// Function to generate the password hash
+const generateHashedPassword = async (password: string): Promise<string> => {
+  const saltRounds = 10; // Número de rounds para o processo de hash
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+};
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -34,38 +42,75 @@ app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003");
 });
 
-//  Rota de login
-app.post("/login", async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
+// app.post("/register", async (req: Request, res: Response) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    // Verificar se o e-mail existe na base de dados
-    const teacher = await db("teacher").where({ email }).first();
+//     if (!name || !email || !password) {
+//       res.status(400).send("Nome, e-mail e senha são obrigatórios");
+//       return;
+//     }
 
-    if (!teacher) {
-      res.status(401).send("Credenciais inválidas");
-      return;
-    }
+//     const existingTeacher = await db("teacher").where({ email }).first();
 
-    // Compare the supplied password with the stored password (using bcrypt)
-    const passwordMatch = await bcrypt.compare(password, teacher.password);
+//     if (existingTeacher) {
+//       res.status(409).send("Professor já cadastrado");
+//       return;
+//     }
 
-    if (!passwordMatch) {
-      res.status(401).send("Credenciais inválidas");
-      return;
-    }
+//     const hashedPassword = await generateHashedPassword(password);
 
-    // Here you can generate an authentication token (JWT, for example) if you wish
-    // Return the token or another success response
-    res.status(200).send("Login bem-sucedido");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro interno do servidor");
-  }
-});
+//     await db("teacher").insert({
+//       name,
+//       email,
+//       password: hashedPassword,
+//     });
+
+//     res.status(201).send("Professor cadastrado com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro interno do servidor");
+//   }
+// });
+
+// Rota para login de professor
+// app.post("/login", async (req: Request, res: Response) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       res.status(400).send("E-mail e senha são obrigatórios");
+//       return;
+//     }
+
+//     const teacher = await db("teacher").where({ email }).first();
+//     console.log("Senha do banco de dados:", teacher.password);
+//     console.log("Senha fornecida:", password);
+//     if (!teacher) {
+//       console.log("Professor não encontrado para o e-mail fornecido");
+//       res.status(401).send("Credenciais inválidas");
+//       return;
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, teacher.password);
+
+//     if (!passwordMatch) {
+//       console.log("Senha incorreta");
+//       res.status(401).send("Credenciais inválidas");
+//       return;
+//     }
+
+//     console.log("Login bem-sucedido");
+//     res.status(200).send("Login bem-sucedido");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro interno do servidor");
+//   }
+// });
 
 // Rota para redefinir a senha (o professor deve estar autenticado)
-//  app.post('/reset-password', async (req: Request, res: Response) => {
+//
+// app.post('/reset-password', async (req: Request, res: Response) => {
 //    try {
 //      const { teacher_id, newPassword } = req.body;
 
@@ -122,7 +167,6 @@ app.get("/students", async (req: Request, res: Response) => {
     }
   }
 });
-
 app.get("/inactivStudents", async (req: Request, res: Response) => {
   try {
     const nameToFind = req.query.name as string;
@@ -155,7 +199,69 @@ app.get("/inactivStudents", async (req: Request, res: Response) => {
     }
   }
 });
+app.get("/notes", async (req: Request, res: Response) => {
+  try {
+    // Retrieves all notes from the database
+    const allNotes = await db("notes");
 
+    // Returns a list of all notes
+    res.status(200).json(allNotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+app.get("/notes/:studentId", async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.studentId;
+
+    // Checks if studentId is a non-empty string
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      res.status(422).send("'studentId' deve ser uma string não vazia");
+      return;
+    }
+
+    // Retrieves all grades from the database for a specific student
+    const studentNotes = await db("notes").where("student_id", studentId);
+
+    // Returns the list of grades for the specific student
+    res.status(200).json(studentNotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+app.get("/students/:id", async (req: Request, res: Response) => {
+  try {
+    //:id could be any other necessary filter
+    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
+    const students = await db("students");
+    if (typeof idToFind !== "string") {
+      res.status(406); // appropriate status for method not acceptable
+      throw new Error("'idToFind' deve ser uma string");
+    }
+
+    const result = students.find((student) => student.id === idToFind);
+
+    if (!result) {
+      res.status(404); // appropriate status for not found
+      throw new Error("Estudante não encontrado");
+    }
+    res.status(200).send(result);
+    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
+  } catch (error) {
+    if (res.statusCode === 200) {
+      //if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    // we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
 app.post(
   "/students",
   upload.single("photo"),
@@ -310,31 +416,126 @@ app.post(
     }
   }
 );
-
-app.get("/students/:id", async (req: Request, res: Response) => {
+app.put("/students/:id", async (req: Request, res: Response) => {
   try {
-    //:id could be any other necessary filter
-    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
+    const idToEdit = req.params.id;
     const students = await db("students");
-    if (typeof idToFind !== "string") {
-      res.status(406); // appropriate status for method not acceptable
-      throw new Error("'idToFind' deve ser uma string");
+    if (typeof idToEdit !== "string") {
+      res.status(406); // status apropriado para método não aceitável
+      throw new Error("'id' deve ser uma string");
     }
+    const student = students.find((student) => student.id === idToEdit);
 
-    const result = students.find((student) => student.id === idToFind);
-
-    if (!result) {
-      res.status(404); // appropriate status for not found
+    if (!student) {
+      res.status(404); // status apropriado para não encontrado
       throw new Error("Estudante não encontrado");
     }
-    res.status(200).send(result);
-    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
+
+    const newId = req.body.id as string | undefined;
+    const newName = req.body.name as string | undefined;
+    const newEmail = req.body.email as string | undefined;
+    const newPhone = req.body.phone as number | undefined;
+    const newAge = req.body.age as number | undefined;
+    const newPhoto = req.body.photo as TImageData | string | null;
+    const newTeacherId = req.body.teacher_id as string | undefined;
+    const newClassId = req.body.class_id as string | undefined;
+
+    if (newId !== undefined) {
+      if (typeof newId !== "string" || newId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newTeacherId !== undefined) {
+      if (typeof newTeacherId !== "string" || newTeacherId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newTeacherId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newClassId !== undefined) {
+      if (typeof newClassId !== "string" || newClassId.length < 1) {
+        res.status(406); // status apropriado para método não aceitável
+        throw new Error(
+          "'newClassId' deve ser uma string e ter pelo menos um caractere"
+        );
+      }
+    }
+    if (newPhoto !== undefined) {
+      if (
+        typeof newPhoto !== "string" ||
+        newPhoto.length < 1 ||
+        !(typeof newPhoto === "string" || Buffer.isBuffer(newPhoto))
+      ) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error(
+          "'newPhoto' deve ser uma string ou um buffer e ter pelo menos um caractere"
+        );
+      }
+    }
+
+    if (newName !== undefined) {
+      if (typeof newName !== "string" || newName.length < 2) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error(
+          "'newName' deve ser uma string e ter pelo menos dois caracteres"
+        );
+      }
+    }
+
+    if (newEmail !== undefined) {
+      if (typeof newEmail !== "string") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newEmail' deve ser uma string");
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newEmail' deve ser um email válido");
+      }
+    }
+    if (newAge !== undefined) {
+      if (typeof newAge !== "number") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newAge' deve ser um número");
+      }
+    }
+
+    if (newPhone !== undefined) {
+      if (typeof newPhone !== "number") {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newPhone' deve ser um número");
+      }
+
+      const newPhoneString: string = newPhone.toString();
+      const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
+
+      if (!phoneRegex.test(newPhoneString)) {
+        res.status(406); // appropriate status for non-acceptable method
+        throw new Error("'newPhone' deve ser um número de telefone válido");
+      }
+    }
+    const updatedStudentData = {
+      name: newName || student.name,
+      email: newEmail || student.email,
+      phone: newPhone || student.phone,
+      age: newAge || student.age,
+      photo: newPhoto || student.photo,
+      teacher_id: newTeacherId || student.teacher_id,
+      class_id: newClassId || student.class_id,
+    };
+    await db("students").where("id", idToEdit).update(updatedStudentData);
+    res.status(200).send("Atualização realizada com sucesso");
   } catch (error) {
     if (res.statusCode === 200) {
-      //if it arrives still worth 200 we know it was an unexpected mistake
+      // if it arrives still worth 200 we know it was an unexpected error
       res.status(500); // we set 500 because it's something the server didn't foresee
     }
-    // we've added a validation flow for the 'error' parameter
+    // add a validation flow for the 'error' parameter
     if (error instanceof Error) {
       res.send(error.message);
     } else {
@@ -342,104 +543,50 @@ app.get("/students/:id", async (req: Request, res: Response) => {
     }
   }
 });
-// //edit
-// app.put("/students/:id", (req: Request, res: Response) => {
-//   try {
-//     const idToEdit = req.params.id;
+app.put("/notes/:id", async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.id;
+    const newNote = req.body.note;
+    console.log(newNote);
+    console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
-//     if (typeof idToEdit !== "string") {
-//       res.status(406); // status apropriado para método não aceitável
-//       throw new Error("'id' deve ser uma string");
-//     }
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      res.status(422).send("'studentId' deve ser uma string não vazia");
+      return;
+    }
 
-//     const student = students.find((student) => student.id === idToEdit);
+    if (typeof newNote !== "string" || newNote.length === 0) {
+      res.status(422).send("'note' deve ser uma string não vazia");
+      return;
+    }
 
-//     if (!student) {
-//       res.status(404); // status apropriado para não encontrado
-//       throw new Error("Estudante não encontrado");
-//     }
+    const existingStudent = await db("students").where("id", studentId).first();
 
-//     const newId = req.body.id as string | undefined;
-//     const newName = req.body.name as string | undefined;
-//     const newEmail = req.body.email as string | undefined;
-//     const newAge = req.body.age as number | undefined;
-//     const newTelephone = req.body.telephone as number | undefined;
-//     const newNotes = req.body.notes as string[] | undefined;
+    if (!existingStudent) {
+      res.status(404).send("Estudante não encontrado");
+      return;
+    }
 
-//     if (newId !== undefined) {
-//       if (typeof newId !== "string" || newId.length < 1) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'newId' deve ser uma string e ter pelo menos um caractere"
-//         );
-//       }
-//     }
+    const noteId = await db("notes").insert({
+      student_id: studentId,
+      teacher_id: existingStudent.teacher_id,
+      note: newNote,
+    });
 
-//     if (newName !== undefined) {
-//       if (typeof newName !== "string" || newName.length < 2) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error(
-//           "'newName' deve ser uma string e ter pelo menos dois caracteres"
-//         );
-//       }
-//     }
+    const updatedNotes = existingStudent.notes
+      ? [...existingStudent.notes, { id: noteId[0], note: newNote }]
+      : [{ id: noteId[0], note: newNote }];
 
-//     if (newEmail !== undefined) {
-//       if (typeof newEmail !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newEmail' deve ser uma string");
-//       }
+    await db("students").where("id", studentId).update({
+      notes: updatedNotes,
+    });
 
-//       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//       if (!emailRegex.test(newEmail)) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newEmail' deve ser um email válido");
-//       }
-//     }
-//     if (newAge !== undefined) {
-//       if (typeof newAge !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newAge' deve ser um número");
-//       }
-//     }
-
-//     if (newTelephone !== undefined) {
-//       if (typeof newTelephone !== "number") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newTelephone' deve ser um número");
-//       }
-
-//       const newTelephoneString: string = newTelephone.toString();
-//       const phoneRegex = /^(?:\+\d{1,4}\s?)?\d{6,14}$/;
-
-//       if (!phoneRegex.test(newTelephoneString)) {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newTelephone' deve ser um número de telefone válido");
-//       }
-//     }
-
-//     if (newNotes !== undefined) {
-//       if (typeof newNotes !== "string") {
-//         res.status(406); // status apropriado para método não aceitável
-//         throw new Error("'newNotes' deve ser uma string");
-//       }
-//     }
-
-//     res.status(200).send("Atualização realizada com sucesso");
-//   } catch (error) {
-//     if (res.statusCode === 200) {
-//       // se chegar ainda valendo 200 sabemos que foi um erro inesperado
-//       res.status(500); // definimos 500 porque é algo que o servidor não previu
-//     }
-//     // adicionamos um fluxo de validação do parâmetro 'error'
-//     if (error instanceof Error) {
-//       res.send(error.message);
-//     } else {
-//       res.send("Erro inesperado");
-//     }
-//   }
-// });
-
+    res.status(200).send("Atualização da nota realizada com sucesso");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
 app.delete("/students/:id", async (req: Request, res: Response) => {
   try {
     const students = await db("students");
@@ -524,22 +671,48 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
     }
   }
 });
-// app.post("/notes/:id", async (req: Request, res: Response) => {
+app.delete("/notes/:id", async (req: Request, res: Response) => {
+  try {
+    const noteId = req.params.id;
+
+    // Checks if noteId is a non-empty string
+    if (typeof noteId !== "string" || noteId.length === 0) {
+      res.status(422).send("'noteId' deve ser uma string não vazia");
+      return;
+    }
+
+    // Deletes the note from the database
+    const deletedRows = await db("notes").where("id", noteId).del();
+
+    // Checks if the note was found and deleted
+    if (deletedRows === 0) {
+      res.status(404).send("Nota não encontrada");
+    } else {
+      res.status(200).send("Nota deletada com sucesso");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro inesperado");
+  }
+});
+
+// app.put("/annotations/:id", async (req: Request, res: Response) => {
 //   try {
 //     const studentId = req.params.id;
-//     const { note } = req.body;
+//     const newAnnotation = req.body.annotation;
+
+//     console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
 //     if (typeof studentId !== "string" || studentId.length === 0) {
 //       res.status(422).send("'studentId' deve ser uma string não vazia");
 //       return;
 //     }
 
-//     if (typeof note !== "string" || note.length === 0) {
-//       res.status(422).send("'note' deve ser uma string não vazia");
+//     if (typeof newAnnotation !== "string" || newAnnotation.length === 0) {
+//       res.status(422).send("'annotation' deve ser uma string não vazia");
 //       return;
 //     }
 
-//     // Verifica se o aluno existe
 //     const existingStudent = await db("students").where("id", studentId).first();
 
 //     if (!existingStudent) {
@@ -547,24 +720,28 @@ app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
 //       return;
 //     }
 
-//     // Atualiza a nota e adiciona a nova nota
-//     const updatedNotes = existingStudent.notes
-//       ? `${existingStudent.notes}\n${note}`
-//       : note;
-
-//     // Atualiza o campo notes do estudante
-//     await db("students").where("id", studentId).update({
-//       notes: updatedNotes,
-//     });
-
-//     // Insere a nota na tabela notes
-//     await db("notes").insert({
+//     // Inserir a nova anotação na tabela de anotações
+//     const [annotationId] = await db("annotations").insert({
 //       student_id: studentId,
 //       teacher_id: existingStudent.teacher_id,
-//       note: note,
+//       annotation: newAnnotation,
 //     });
 
-//     res.status(200).send("Nova nota adicionada com sucesso");
+//     // Atualizar as anotações do estudante, mantendo as existentes
+//     const updatedAnnotations = existingStudent.annotations
+//       ? [
+//           ...existingStudent.annotations,
+//           { id: annotationId, annotation: newAnnotation },
+//         ]
+//       : [{ id: annotationId, annotation: newAnnotation }];
+
+//     await db("students")
+//       .where("id", studentId)
+//       .update({
+//         annotations: JSON.stringify(updatedAnnotations),
+//       });
+
+//     res.status(200).send("Nova anotação adicionada com sucesso");
 //   } catch (error) {
 //     console.error(error);
 //     res.status(500).send("Erro inesperado");
