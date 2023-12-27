@@ -547,8 +547,6 @@ app.put("/notes/:id", async (req: Request, res: Response) => {
   try {
     const studentId = req.params.id;
     const newNote = req.body.note;
-    console.log(newNote);
-    console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
     if (typeof studentId !== "string" || studentId.length === 0) {
       res.status(422).send("'studentId' deve ser uma string não vazia");
