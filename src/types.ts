@@ -1,24 +1,24 @@
 // export enum  {
 // 	por enquanto não há nenhum enum neste projeto
 // }
-export type TImageData = {
+export interface TImageData {
   data: Buffer;
   mimeType: "image/png" | "image/jpeg";
-};
+}
 
-export type TNote = {
+export interface TNote {
   id: string; // Add a unique identifier for each note
   note: string;
   // Add any other fields relevant to the note here
-};
+}
 
-export type TAnnotation = {
+export interface TAnnotation {
   id: string; // Add a unique identifier for each note
   annotation: string;
   // Add any other fields relevant to the annotations here
-};
+}
 
-export type TStudents = {
+export interface TStudents {
   id: string;
   name: string;
   email: string;
@@ -29,8 +29,8 @@ export type TStudents = {
   photo?: TImageData | string | null;
   teacher_id: string;
   class_id: string;
-};
-export type TInactiveStudentsData = {
+}
+export interface TInactiveStudentsData {
   id: string;
   name: string;
   email: string;
@@ -41,33 +41,33 @@ export type TInactiveStudentsData = {
   photo: Buffer;
   teacher_id: string;
   class_id: string;
-};
-export type TCalendarData = {
+}
+export interface TCalendarData {
   id: number;
   teacher_id: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
-};
+}
 
-export type TPasswordResetData = {
+export interface TPasswordResetData {
   id: number;
   user_id: string;
   token: string;
   expires_at: string;
-};
+}
 
-export type TNotesData = {
+export interface TNotesData {
   id: number;
   student_id: string;
   teacher_id: string;
   note: string;
-};
+}
 
-export type TChatData = {
+export interface TChatData {
   id: number;
   student_id: string;
   teacher_id: string;
   message: string;
   timestamp: string;
-};
+}

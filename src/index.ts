@@ -2,11 +2,12 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { TImageData, TStudents } from "./types";
 import multer, { Multer } from "multer";
-import { db } from "../src/database/knex";
+import { BaseDatabase } from "../src/database/BaseDatabase";
 import validUrl from "valid-url";
 import * as bcrypt from "bcrypt";
 import { TNote } from "./types";
 import { TAnnotation } from "./types";
+import { StudentDB } from "../src/database/StudentDatabase";
 
 const app = express();
 
@@ -138,7 +139,8 @@ app.listen(3003, () => {
 app.get("/students", async (req: Request, res: Response) => {
   try {
     const nameToFind = req.query.name as string;
-    const students = await db("students");
+    const studentDatabase = new StudentDB();
+    const students = await studentDatabase.findStudent(nameToFind);
 
     if (nameToFind) {
       const result: TStudents[] = students.filter((student) =>
@@ -167,101 +169,39 @@ app.get("/students", async (req: Request, res: Response) => {
     }
   }
 });
-app.get("/inactivStudents", async (req: Request, res: Response) => {
-  try {
-    const nameToFind = req.query.name as string;
-    const inactivStudents = await db("inactive_students");
+// app.get("/inactivStudents", async (req: Request, res: Response) => {
+//   try {
+//     const nameToFind = req.query.name as string;
+//     const inactivStudents = await BaseDatabase("inactive_students");
 
-    if (nameToFind) {
-      const result: TStudents[] = inactivStudents.filter((inactivStudent) =>
-        inactivStudent.name.toLowerCase().includes(nameToFind.toLowerCase())
-      );
+//     if (nameToFind) {
+//       const result: TStudents[] = inactivStudents.filter((inactivStudent) =>
+//         inactivStudent.name.toLowerCase().includes(nameToFind.toLowerCase())
+//       );
 
-      if (result.length === 0) {
-        res.status(404); // Appropriate status for not found
-        throw new Error("Estudante inativo não encontrado");
-      }
+//       if (result.length === 0) {
+//         res.status(404); // Appropriate status for not found
+//         throw new Error("Estudante inativo não encontrado");
+//       }
 
-      res.status(200).send(result);
-    } else {
-      res.status(200).send(inactivStudents);
-    }
-  } catch (error) {
-    if (res.statusCode === 200) {
-      //if it arrives still worth 200 we know it was an unexpected mistake
-      res.status(500); // we set 500 because it's something the server didn't foresee
-    }
-    // we've added a validation flow for the 'error' parameter
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
-app.get("/notes", async (req: Request, res: Response) => {
-  try {
-    // Retrieves all notes from the database
-    const allNotes = await db("notes");
+//       res.status(200).send(result);
+//     } else {
+//       res.status(200).send(inactivStudents);
+//     }
+//   } catch (error) {
+//     if (res.statusCode === 200) {
+//       //if it arrives still worth 200 we know it was an unexpected mistake
+//       res.status(500); // we set 500 because it's something the server didn't foresee
+//     }
+//     // we've added a validation flow for the 'error' parameter
+//     if (error instanceof Error) {
+//       res.send(error.message);
+//     } else {
+//       res.send("Erro inesperado");
+//     }
+//   }
+// });
 
-    // Returns a list of all notes
-    res.status(200).json(allNotes);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro inesperado");
-  }
-});
-app.get("/notes/:studentId", async (req: Request, res: Response) => {
-  try {
-    const studentId = req.params.studentId;
-
-    // Checks if studentId is a non-empty string
-    if (typeof studentId !== "string" || studentId.length === 0) {
-      res.status(422).send("'studentId' deve ser uma string não vazia");
-      return;
-    }
-
-    // Retrieves all grades from the database for a specific student
-    const studentNotes = await db("notes").where("student_id", studentId);
-
-    // Returns the list of grades for the specific student
-    res.status(200).json(studentNotes);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro inesperado");
-  }
-});
-app.get("/students/:id", async (req: Request, res: Response) => {
-  try {
-    //:id could be any other necessary filter
-    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
-    const students = await db("students");
-    if (typeof idToFind !== "string") {
-      res.status(406); // appropriate status for method not acceptable
-      throw new Error("'idToFind' deve ser uma string");
-    }
-
-    const result = students.find((student) => student.id === idToFind);
-
-    if (!result) {
-      res.status(404); // appropriate status for not found
-      throw new Error("Estudante não encontrado");
-    }
-    res.status(200).send(result);
-    // .send('O estudante localizado foi: ${result} seu nome é ${result?.name}');
-  } catch (error) {
-    if (res.statusCode === 200) {
-      //if it arrives still worth 200 we know it was an unexpected mistake
-      res.status(500); // we set 500 because it's something the server didn't foresee
-    }
-    // we've added a validation flow for the 'error' parameter
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
 app.post(
   "/students",
   upload.single("photo"),
@@ -279,6 +219,20 @@ app.post(
         class_id,
       } = req.body;
 
+      if (class_id !== undefined) {
+        if (typeof class_id !== "string" || class_id.length < 1) {
+          throw new Error(
+            "'class_id' deve ser uma string e ser maior que um caractere"
+          );
+        }
+      }
+      if (teacher_id !== undefined) {
+        if (typeof teacher_id !== "string" || teacher_id.length < 1) {
+          throw new Error(
+            "'teacher_id' deve ser uma string e ser maior que um caractere"
+          );
+        }
+      }
       if (req.body.photo) {
         const photoUrl = req.body.photo as string;
         if (!validUrl.isUri(photoUrl)) {
@@ -400,7 +354,9 @@ app.post(
           : null,
       };
 
-      await db("students").insert(newStudent);
+      const studentDatabase = new StudentDB();
+      await studentDatabase.insertStudent(newStudent);
+
       res.status(201).send("Cadastro do novo aluno realizado com sucesso");
     } catch (error) {
       if (res.statusCode === 200) {
@@ -416,15 +372,48 @@ app.post(
     }
   }
 );
+
+app.get("/students/:id", async (req: Request, res: Response) => {
+  try {
+    //:id could be any other necessary filter
+    const idToFind = req.params.id; // we don't need to force typing here, because all path params are strings
+    const studentDatabase = new StudentDB();
+    const students = await studentDatabase.findStudentByID(idToFind);
+
+    if (typeof idToFind !== "string") {
+      res.status(406); // appropriate status for method not acceptable
+      throw new Error("'idToFind' deve ser uma string");
+    }
+
+    if (!students) {
+      res.status(404); // appropriate status for not found
+      throw new Error("Estudante não encontrado");
+    }
+    res.status(200).send(students);
+  } catch (error) {
+    if (res.statusCode === 200) {
+      //if it arrives still worth 200 we know it was an unexpected mistake
+      res.status(500); // we set 500 because it's something the server didn't foresee
+    }
+    // we've added a validation flow for the 'error' parameter
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
+});
+// //edit
 app.put("/students/:id", async (req: Request, res: Response) => {
   try {
     const idToEdit = req.params.id;
-    const students = await db("students");
+
     if (typeof idToEdit !== "string") {
       res.status(406); // status apropriado para método não aceitável
       throw new Error("'id' deve ser uma string");
     }
-    const student = students.find((student) => student.id === idToEdit);
+    const studentDatabase = new StudentDB();
+    const student = await studentDatabase.findStudentByID(idToEdit);
 
     if (!student) {
       res.status(404); // status apropriado para não encontrado
@@ -519,7 +508,7 @@ app.put("/students/:id", async (req: Request, res: Response) => {
         throw new Error("'newPhone' deve ser um número de telefone válido");
       }
     }
-    const updatedStudentData = {
+    const updatedStudentData: Record<string, any> = {
       name: newName || student.name,
       email: newEmail || student.email,
       phone: newPhone || student.phone,
@@ -528,7 +517,7 @@ app.put("/students/:id", async (req: Request, res: Response) => {
       teacher_id: newTeacherId || student.teacher_id,
       class_id: newClassId || student.class_id,
     };
-    await db("students").where("id", idToEdit).update(updatedStudentData);
+    await studentDatabase.editStudentByID(idToEdit, updatedStudentData);
     res.status(200).send("Atualização realizada com sucesso");
   } catch (error) {
     if (res.statusCode === 200) {
@@ -543,77 +532,23 @@ app.put("/students/:id", async (req: Request, res: Response) => {
     }
   }
 });
-app.put("/notes/:id", async (req: Request, res: Response) => {
-  try {
-    const studentId = req.params.id;
-    const newNote = req.body.note;
-    console.log(newNote);
-    console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
-    if (typeof studentId !== "string" || studentId.length === 0) {
-      res.status(422).send("'studentId' deve ser uma string não vazia");
-      return;
-    }
-
-    if (typeof newNote !== "string" || newNote.length === 0) {
-      res.status(422).send("'note' deve ser uma string não vazia");
-      return;
-    }
-
-    const existingStudent = await db("students").where("id", studentId).first();
-
-    if (!existingStudent) {
-      res.status(404).send("Estudante não encontrado");
-      return;
-    }
-
-    const noteId = await db("notes").insert({
-      student_id: studentId,
-      teacher_id: existingStudent.teacher_id,
-      note: newNote,
-    });
-
-    const updatedNotes = existingStudent.notes
-      ? [...existingStudent.notes, { id: noteId[0], note: newNote }]
-      : [{ id: noteId[0], note: newNote }];
-
-    await db("students").where("id", studentId).update({
-      notes: updatedNotes,
-    });
-
-    res.status(200).send("Atualização da nota realizada com sucesso");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro inesperado");
-  }
-});
 app.delete("/students/:id", async (req: Request, res: Response) => {
   try {
-    const students = await db("students");
     const idToDelete = req.params.id;
-    const [student] = await db("students").where({ id: idToDelete });
+    const studentDatabase = new StudentDB();
+    await studentDatabase.deleteStudentByID(idToDelete);
 
     if (typeof idToDelete !== "string") {
       res.status(406); // appropriate status for method not acceptable
       throw new Error("'idToDelete' deve ser uma string");
     }
 
-    const studentIndex = students.findIndex(
-      (student) => student.id === idToDelete
-    );
-
-    if (studentIndex === -1) {
-      res.status(404); // appropriate status for not found
-      throw new Error("Estudante não encontrado");
-    }
-    if (!student) {
+    if (!studentDatabase) {
       res.status(404);
       throw new Error("'id' não encontrada");
     }
 
-    await db("students").del().where({ id: idToDelete });
-    // students.splice(studentIndex, 1);
-    // res.status(204).send(); esse erro não permite mensagem
     res.status(200).send("Estudante deletado com sucesso.");
   } catch (error) {
     if (res.statusCode === 200) {
@@ -628,80 +563,102 @@ app.delete("/students/:id", async (req: Request, res: Response) => {
     }
   }
 });
-app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
-  try {
-    const inactivStudents = await db("inactive_students");
-    const idToDelete = req.params.id;
-    const [inactivStudent] = await db("inactive_students").where({
-      id: idToDelete,
-    });
+// app.delete("/inactivStudents/:id", async (req: Request, res: Response) => {
+//   try {
+//     const inactivStudents = await BaseDatabase("inactive_students");
+//     const idToDelete = req.params.id;
+//     const [inactivStudent] = await BaseDatabase("inactive_students").where({
+//       id: idToDelete,
+//     });
 
-    if (typeof idToDelete !== "string") {
-      res.status(406); // appropriate status for method not acceptable
-      throw new Error("'idToDelete' deve ser uma string");
-    }
+//     if (typeof idToDelete !== "string") {
+//       res.status(406); // appropriate status for method not acceptable
+//       throw new Error("'idToDelete' deve ser uma string");
+//     }
 
-    const studentIndex = inactivStudents.findIndex(
-      (inactivStudent) => inactivStudent.id === idToDelete
-    );
+//     const studentIndex = inactivStudents.findIndex(
+//       (inactivStudent) => inactivStudent.id === idToDelete
+//     );
 
-    if (studentIndex === -1) {
-      res.status(404); // appropriate status for not found
-      throw new Error("Estudante não encontrado");
-    }
-    if (!inactivStudent) {
-      res.status(404);
-      throw new Error("'id' não encontrada");
-    }
+//     if (studentIndex === -1) {
+//       res.status(404); // appropriate status for not found
+//       throw new Error("Estudante não encontrado");
+//     }
+//     if (!inactivStudent) {
+//       res.status(404);
+//       throw new Error("'id' não encontrada");
+//     }
 
-    await db("inactive_students").del().where({ id: idToDelete });
-    // students.splice(studentIndex, 1);
-    // res.status(204).send(); esse erro não permite mensagem
-    res.status(200).send("Estudante deletado com sucesso.");
-  } catch (error) {
-    if (res.statusCode === 200) {
-      // if it arrives still worth 200 we know it was an unexpected mistake
-      res.status(500); //we set 500 because it's something the server didn't foresee
-    }
-    // we've added a validation flow for the 'error' parameter
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
-app.delete("/notes/:id", async (req: Request, res: Response) => {
-  try {
-    const noteId = req.params.id;
+//     await db("inactive_students").del().where({ id: idToDelete });
+//     // students.splice(studentIndex, 1);
+//     // res.status(204).send(); esse erro não permite mensagem
+//     res.status(200).send("Estudante deletado com sucesso.");
+//   } catch (error) {
+//     if (res.statusCode === 200) {
+//       // if it arrives still worth 200 we know it was an unexpected mistake
+//       res.status(500); //we set 500 because it's something the server didn't foresee
+//     }
+//     // we've added a validation flow for the 'error' parameter
+//     if (error instanceof Error) {
+//       res.send(error.message);
+//     } else {
+//       res.send("Erro inesperado");
+//     }
+//   }
+// });
 
-    // Checks if noteId is a non-empty string
-    if (typeof noteId !== "string" || noteId.length === 0) {
-      res.status(422).send("'noteId' deve ser uma string não vazia");
-      return;
-    }
+// app.put("/notes/:id", async (req: Request, res: Response) => {
+//   try {
+//     const studentId = req.params.id;
+//     const newNote = req.body.note;
+//     console.log(newNote);
+//     console.log(req.body); // Adicione este log para verificar o corpo da requisição
 
-    // Deletes the note from the database
-    const deletedRows = await db("notes").where("id", noteId).del();
+//     if (typeof studentId !== "string" || studentId.length === 0) {
+//       res.status(422).send("'studentId' deve ser uma string não vazia");
+//       return;
+//     }
 
-    // Checks if the note was found and deleted
-    if (deletedRows === 0) {
-      res.status(404).send("Nota não encontrada");
-    } else {
-      res.status(200).send("Nota deletada com sucesso");
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro inesperado");
-  }
-});
+//     if (typeof newNote !== "string" || newNote.length === 0) {
+//       res.status(422).send("'note' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     const existingStudent = await BaseDatabase("students")
+//       .where("id", studentId)
+//       .first();
+
+//     if (!existingStudent) {
+//       res.status(404).send("Estudante não encontrado");
+//       return;
+//     }
+
+//     const noteId = await BaseDatabase("notes").insert({
+//       student_id: studentId,
+//       teacher_id: existingStudent.teacher_id,
+//       note: newNote,
+//     });
+
+//     const updatedNotes = existingStudent.notes
+//       ? [...existingStudent.notes, { id: noteId[0], note: newNote }]
+//       : [{ id: noteId[0], note: newNote }];
+
+//     await BaseDatabase("students").where("id", studentId).update({
+//       notes: updatedNotes,
+//     });
+
+//     res.status(200).send("Atualização da nota realizada com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro inesperado");
+//   }
+// });
 
 // app.put("/annotations/:id", async (req: Request, res: Response) => {
 //   try {
 //     const studentId = req.params.id;
 //     const newAnnotation = req.body.annotation;
-
-//     console.log(req.body); // Adicione este log para verificar o corpo da requisição
+//     console.log(newAnnotation);
 
 //     if (typeof studentId !== "string" || studentId.length === 0) {
 //       res.status(422).send("'studentId' deve ser uma string não vazia");
@@ -720,8 +677,58 @@ app.delete("/notes/:id", async (req: Request, res: Response) => {
 //       return;
 //     }
 
+//     const annotationId = await db("annotations").insert({
+//       student_id: studentId,
+//       teacher_id: existingStudent.teacher_id,
+//       annotation: newAnnotation,
+//     });
+
+//     const updatedAnnotations = existingStudent.annotations
+//       ? [
+//           ...existingStudent.annotations,
+//           { id: annotationId.toString(), annotation: newAnnotation },
+//         ]
+//       : [{ id: annotationId.toString(), annotation: newAnnotation }];
+
+//     await db("students").where("id", studentId).update({
+//       annotations: updatedAnnotations,
+//     });
+
+//     res.status(200).send("Atualização da anotação realizada com sucesso");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Erro inesperado");
+//   }
+// });
+
+// app.put("/annotations/:id", async (req: Request, res: Response) => {
+//   try {
+//     const studentId = req.params.id;
+//     const newAnnotation = req.body.annotation;
+
+//     console.log(req.body); // Adicione este log para verificar o corpo da requisição
+
+//     if (typeof studentId !== "string" || studentId.length === 0) {
+//       res.status(422).send("'studentId' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     if (typeof newAnnotation !== "string" || newAnnotation.length === 0) {
+//       res.status(422).send("'annotation' deve ser uma string não vazia");
+//       return;
+//     }
+
+//     const existingStudent = await BaseDatabase("students")
+//       .where("id", studentId)
+//       .first();
+
+//     if (!existingStudent) {
+//       res.status(404).send("Estudante não encontrado");
+//       return;
+//     }
+
 //     // Inserir a nova anotação na tabela de anotações
-//     const [annotationId] = await db("annotations").insert({
+//     const [annotationId] = await BaseDatabase("annotations").insert({
 //       student_id: studentId,
 //       teacher_id: existingStudent.teacher_id,
 //       annotation: newAnnotation,
@@ -735,7 +742,7 @@ app.delete("/notes/:id", async (req: Request, res: Response) => {
 //         ]
 //       : [{ id: annotationId, annotation: newAnnotation }];
 
-//     await db("students")
+//     await BaseDatabase("students")
 //       .where("id", studentId)
 //       .update({
 //         annotations: JSON.stringify(updatedAnnotations),
