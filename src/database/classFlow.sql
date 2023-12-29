@@ -32,6 +32,7 @@ CREATE TABLE students (
   photo BLOB DEFAULT x'F1F2F3F4', -- Default value for a dummy image (change as necessary)
   teacher_id TEXT NOT NULL,
     class_id TEXT NOT NULL,
+    
   FOREIGN KEY (class_id) REFERENCES class (id),
   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
   

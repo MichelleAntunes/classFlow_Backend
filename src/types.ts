@@ -3,7 +3,7 @@
 // }
 export interface TImageData {
   data: Buffer;
-  mimeType: "image/png" | "image/jpeg";
+  mimeType?: "image/png" | "image/jpeg";
 }
 
 export interface TNote {
@@ -26,7 +26,7 @@ export interface TStudents {
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: TImageData | string | null;
+  photo?: TImageData | string | null | undefined;
   teacher_id: string;
   class_id: string;
 }
