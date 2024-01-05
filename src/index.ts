@@ -1,10 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import multer, { Multer } from "multer";
 import dotenv from "dotenv";
-import * as bcrypt from "bcrypt";
-import { StudentController } from "./controller/StudentController";
-import { StudentBusiness } from "./business/StudentsBusiness";
+import { userRouter } from "./router/studentRouter";
 
 dotenv.config();
 
@@ -17,29 +14,8 @@ app.listen(Number(process.env.PORT) || 3003, () => {
   console.log(`Servidor rodando na porta ${Number(process.env.PORT) || 3003}`);
 });
 
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    // Extraction of the original file extension:
-    const fileExtension = file.originalname.split(".")[1];
+app.use("/students", userRouter);
 
-    // Creates a random code that will be the name of the file
-    const newFileName = require("crypto").randomBytes(64).toString("hex");
-
-    // Indicates the new file name:
-    cb(null, `${newFileName}.${fileExtension}`);
-  },
-});
-const upload: Multer = multer({ storage });
-
-app.get("/students", studentController.getStudents);
-app.post("/students", upload.single("photo"), studentController.createStudent);
-app.get("/students/:id", studentController.getStudentById);
-app.put("/students/:id", studentController.editStudentById);
-app.delete("/students/:id", studentController.delteStudentById);
 // app.get("/inactivStudents", async (req: Request, res: Response) => {
 //   try {
 //     const nameToFind = req.query.name as string;
