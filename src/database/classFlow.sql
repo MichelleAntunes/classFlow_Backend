@@ -1,24 +1,17 @@
--- Active: 1702490604086@@127.0.0.1@3306
-
 
 -- Table teacher (professor): Stores information about teachers.
 
-CREATE TABLE teacher (
-  id TEXT PRIMARY KEY NOT NULL,
+CREATE TABLE teachers (
+  id TEXT PRIMARY KEY UNIQUE NOT NULL,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL
+  password TEXT NOT NULL,
+  CHECK (length(password) > 0)  -- Ensures that the password is not empty
+  email_verified BOOLEAN DEFAULT FALSE 
+  created_at TEXT DEFAULT (DATETIME()) NOT NULL
+  role TEXT NOT NULL, 
 );
--- DROP TABLE teacher; 
-
--- Table class: Represents classes or lists of students associated with a teacher.
-CREATE TABLE class (
-  id TEXT PRIMARY KEY NOT NULL,
-  name TEXT NOT NULL,
-  teacher_id TEXT NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
-);
--- DROP TABLE class;
+DROP TABLE teachers; 
 
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
@@ -27,63 +20,66 @@ CREATE TABLE students (
   email TEXT UNIQUE NOT NULL,
   phone INTEGER,
   age INTEGER,
-  notes TEXT DEFAULT '', --Starts as an empty string if no value is supplied
-  annotations TEXT DEFAULT '', --Starts as an empty string if no value is supplied
+  notes TEXT DEFAULT '[Nenhuma nota]', -- JSON array as the default value, starts as an empty string if no value is supplied
+  annotations TEXT DEFAULT '[Nenhuma anotação]', --JSON array as the default value, starts as an empty string if no value is supplied
   photo BLOB DEFAULT x'F1F2F3F4', -- Default value for a dummy image (change as necessary)
   teacher_id TEXT NOT NULL,
-    class_id TEXT NOT NULL,
-    
+  class_id TEXT NOT NULL,
+  password TEXT NOT NULL 
+  CHECK (length(password) > 0)  -- Ensures that the password is not empty
+  email_verified BOOLEAN DEFAULT FALSE
+  created_at TEXT DEFAULT (DATETIME()) NOT NULL,
+  role TEXT NOT NULL, 
   FOREIGN KEY (class_id) REFERENCES class (id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
-  
-);
--- CREATE TABLE students (
---   id TEXT PRIMARY KEY NOT NULL,
---   name TEXT NOT NULL,
---   email TEXT UNIQUE NOT NULL,
---   phone INTEGER,
---   age INTEGER,
---   notes JSON DEFAULT '[]', -- JSON array as the default value
---   annotations JSON DEFAULT '[]', -- JSON array as the default value
---   photo BLOB DEFAULT x'F1F2F3F4',
---   teacher_id TEXT NOT NULL,
---   class_id TEXT NOT NULL,
---   FOREIGN KEY (class_id) REFERENCES class (id),
---   FOREIGN KEY (teacher_id) REFERENCES teacher (id)
--- );
-
--- Table professor_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
-CREATE TABLE professor_student_relationship (
-      teacher_id TEXT NOT NULL,
-  student_id TEXT NOT NULL,
-  PRIMARY KEY (teacher_id, student_id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id),
-  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
-);
--- DROP TABLE professor_student_relationship; 
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id)
+  );
+DROP TABLE students;
 
 -- Table notes: Stores notes associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE notes (
-  id INTEGER PRIMARY KEY,
-  student_id TEXT,
-  teacher_id TEXT,
+  id TEXT PRIMARY KEY,
+  student_id TEXT UNIQUE NOT NULL,
+  teacher_id TEXT UNIQUE NOT NULL,
   note TEXT NOT NULL,  
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id),
+  created_at TEXT DEFAULT (DATETIME()) NOT NULL,
+  updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE
   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
 );
--- DROP TABLE notes; 
+DROP TABLE notes; 
+-- Table annotations: Stores annotations associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 
+CREATE TABLE annotations (
+  id TEXT PRIMARY KEY NOT NULL,
+  student_id TEXT UNIQUE NOT NULL,
+  teacher_id TEXT  UNIQUE NOT NULL,
+  annotation TEXT NOT NULL,
+  created_at TEXT DEFAULT (DATETIME()) NOT NULL,
+  updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE
+  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
+);
+DROP TABLE annotations; 
+
+-- Table teacher_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
+CREATE TABLE teacher_student_relationship (
+  teacher_id TEXT NOT NULL,
+  student_id TEXT NOT NULL,
+  PRIMARY KEY (teacher_id, student_id),
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id),
+  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
+);
+DROP TABLE professor_student_relationship; 
 -- Table chat: Stores chat messages between teachers and students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE chat (
-  id INTEGER PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   student_id TEXT,
   teacher_id TEXT,
   message TEXT NOT NULL,
   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id),
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id),
   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
-);
--- DROP TABLE chat; 
+); DROP TABLE chat; 
 
 -- Table inactive_students: Stores information about inactive students.
 CREATE TABLE inactive_students (
@@ -96,11 +92,11 @@ CREATE TABLE inactive_students (
   annotations TEXT DEFAULT '', --Starts as an empty string if no value is supplied
   photo BLOB DEFAULT x'F1F2F3F4', -- Default value for a dummy image (change as necessary)
   teacher_id TEXT NOT NULL,
-    class_id TEXT NOT NULL,
-      FOREIGN KEY (class_id) REFERENCES class (id),
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+  class_id TEXT NOT NULL,
+  FOREIGN KEY (class_id) REFERENCES class (id),
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id)
 );
--- DROP TABLE inactive_students; 
+DROP TABLE inactive_students; 
 
 -- Table to store the calendar with the teacher's availability
 CREATE TABLE calendar (
@@ -109,9 +105,9 @@ CREATE TABLE calendar (
   day_of_week INTEGER NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
--- DROP TABLE calendar; 
+DROP TABLE calendar; 
 
 -- Table password_reset teachers
 CREATE TABLE password_reset_teacher (
@@ -119,9 +115,9 @@ CREATE TABLE password_reset_teacher (
   user_id TEXT NOT NULL,
   token TEXT NOT NULL,
   expires_at TIMESTAMP NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES teacher (id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES teachers (id) ON DELETE CASCADE
 );
---  DROP TABLE password_reset_teacher; 
+ DROP TABLE password_reset_teacher; 
 
  -- Table password_reset students
 CREATE TABLE password_reset_students (
@@ -131,20 +127,26 @@ CREATE TABLE password_reset_students (
   expires_at TIMESTAMP NOT NULL,
   FOREIGN KEY (user_id) REFERENCES students (id) ON DELETE CASCADE
 );
---  DROP TABLE password_reset_students; 
+ DROP TABLE password_reset_students; 
 
--- Table annotations: Stores annotations associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
-CREATE TABLE annotations (
-  id INTEGER PRIMARY KEY,
-  student_id TEXT,
-  teacher_id TEXT,
-  annotation TEXT NOT NULL,
-  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
-  FOREIGN KEY (teacher_id) REFERENCES teacher (id)
+-- Table class: Represents classes or lists of students associated with a teacher.
+CREATE TABLE classes (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  teacher_id TEXT NOT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id)
 );
--- DROP TABLE annotations; 
+DROP TABLE classes;
 
-INSERT INTO teacher (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
+
+CREATE TABLE student_class_relationship (
+  student_id TEXT NOT NULL,
+  class_id TEXT NOT NULL,
+  PRIMARY KEY (student_id, class_id),
+  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
+  FOREIGN KEY (class_id) REFERENCES class (id)
+);
+INSERT INTO teachers (id, name, email, password) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123');
 
  -- Insert values into the class table to represent different classes
 INSERT INTO class (id, name, teacher_id) VALUES

@@ -1,6 +1,3 @@
-// export enum  {
-// 	por enquanto não há nenhum enum neste projeto
-// }
 export interface TImageData {
   data: Buffer;
   mimeType?: "image/png" | "image/jpeg";
