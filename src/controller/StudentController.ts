@@ -1,44 +1,31 @@
 import { Request, Response } from "express";
 import { StudentDatabase } from "../database/StudentDatabase";
-import {
-  TImageData,
-  TNote,
-  TAnnotation,
-  TStudents,
-  TInactiveStudentsData,
-  TCalendarData,
-  TPasswordResetData,
-  TNotesData,
-  TChatData,
-} from "../types";
+import { TImageData, TNote, TAnnotation, TStudents } from "../models/Student";
 
 import { StudentBusiness } from "../business/StudentsBusiness";
 
 export class StudentController {
+  constructor(private studentBusiness: StudentBusiness) {}
+
   public getStudents = async (req: Request, res: Response) => {
     try {
       const nameToFind = req.query.name as string;
-      const studentBusiness = new StudentBusiness();
-      const output = await studentBusiness.getStudents(nameToFind);
+      const output = await this.studentBusiness.getStudents(nameToFind);
 
       res.status(200).send(output);
     } catch (error) {
       if (res.statusCode === 200) {
         // Se a resposta já estiver definida para 200, retorne um erro interno
-        res
-          .status(500)
-          .json({
-            error: error instanceof Error ? error.stack : "Erro inesperado",
-          });
+        res.status(500).json({
+          error: error instanceof Error ? error.stack : "Erro inesperado",
+        });
       } else {
         if (error instanceof Error) {
           res.status(500).json({ error: error.message });
         } else {
-          res
-            .status(500)
-            .json({
-              error: error instanceof Error ? error.stack : "Erro inesperado",
-            });
+          res.status(500).json({
+            error: error instanceof Error ? error.stack : "Erro inesperado",
+          });
         }
       }
     }
@@ -57,8 +44,7 @@ export class StudentController {
         class_id: req.body.class_id,
       };
 
-      const studentBusiness = new StudentBusiness();
-      const output = await studentBusiness.createStudent(input, req);
+      const output = await this.studentBusiness.createStudent(input, req);
 
       res.status(201).send(output);
     } catch (error) {

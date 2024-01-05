@@ -65,7 +65,7 @@ export class Student {
     private photo: TImageData | string | null,
     private teacher_id: string,
     private class_id: string,
-    private password: string,
+    private password: string | undefined,
     private email_verified: string,
     private created_at: string,
     private role: USER_ROLES
@@ -146,7 +146,7 @@ export class Student {
   public setClass_id(value: string): void {
     this.class_id = value;
   }
-  public getPassword(): string {
+  public getPassword(): string | undefined {
     return this.password;
   }
   public setPassword(value: string): void {
