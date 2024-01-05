@@ -1,35 +1,3 @@
-// export enum  {
-// 	por enquanto não há nenhum enum neste projeto
-// }
-export interface TImageData {
-  data: Buffer;
-  mimeType?: "image/png" | "image/jpeg";
-}
-
-export interface TNote {
-  id: string; // Add a unique identifier for each note
-  note: string;
-  // Add any other fields relevant to the note here
-}
-
-export interface TAnnotation {
-  id: string; // Add a unique identifier for each note
-  annotation: string;
-  // Add any other fields relevant to the annotations here
-}
-
-export interface TStudents {
-  id: string;
-  name: string;
-  email: string;
-  phone: number | null;
-  age: number | null;
-  notes?: TNote[]; // Array of note objects
-  annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: TImageData | string | null | undefined;
-  teacher_id: string;
-  class_id: string;
-}
 export interface TInactiveStudentsData {
   id: string;
   name: string;

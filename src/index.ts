@@ -1,54 +1,21 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { TImageData, TStudents } from "./types";
-import multer, { Multer } from "multer";
-import { BaseDatabase } from "../src/database/BaseDatabase";
-import * as bcrypt from "bcrypt";
-import { TNote } from "./types";
-import { TAnnotation } from "./types";
-import { StudentDatabase } from "../src/database/StudentDatabase";
-import { StudentController } from "./controller/StudentController";
+import dotenv from "dotenv";
+import { userRouter } from "./router/studentRouter";
+
+dotenv.config();
 
 const app = express();
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-app.listen(3003, () => {
-  console.log("Servidor rodando na porta 3003");
+app.listen(Number(process.env.PORT) || 3003, () => {
+  console.log(`Servidor rodando na porta ${Number(process.env.PORT) || 3003}`);
 });
 
-const studentController = new StudentController();
+app.use("/students", userRouter);
 
-// Function to generate the password hash
-const generateHashedPassword = async (password: string): Promise<string> => {
-  const saltRounds = 10; // Número de rounds para o processo de hash
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  return hashedPassword;
-};
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    // Extraction of the original file extension:
-    const fileExtension = file.originalname.split(".")[1];
-
-    // Creates a random code that will be the name of the file
-    const newFileName = require("crypto").randomBytes(64).toString("hex");
-
-    // Indicates the new file name:
-    cb(null, `${newFileName}.${fileExtension}`);
-  },
-});
-const upload: Multer = multer({ storage });
-
-app.get("/students", studentController.getStudents);
-app.post("/students", upload.single("photo"), studentController.createStudent);
-app.get("/students/:id", studentController.getStudentById);
-app.put("/students/:id", studentController.editStudentById);
-app.delete("/students/:id", studentController.delteStudentById);
 // app.get("/inactivStudents", async (req: Request, res: Response) => {
 //   try {
 //     const nameToFind = req.query.name as string;

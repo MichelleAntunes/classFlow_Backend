@@ -1,4 +1,4 @@
-import { TStudents } from "../types";
+import { TStudents } from "../models/Student";
 import { BaseDatabase } from "./BaseDatabase";
 
 export class StudentDatabase extends BaseDatabase {
@@ -46,14 +46,18 @@ export class StudentDatabase extends BaseDatabase {
     const {
       id,
       name,
-      age,
       email,
       phone,
+      age,
       notes,
       annotations,
+      photo,
       teacher_id,
       class_id,
-      photo,
+      password,
+      email_verified,
+      created_at,
+      role,
     } = newStudent;
 
     // Logic to process the image if a photo file has been uploaded
@@ -68,19 +72,23 @@ export class StudentDatabase extends BaseDatabase {
     const newStudentDB: TStudents = {
       id,
       name,
-      age,
       email,
       phone,
+      age,
       notes,
       annotations,
-      teacher_id,
-      class_id,
       photo: photoData
         ? {
             data: photoData,
             mimeType: mimeType as "image/png" | "image/jpeg",
           }
         : null,
+      teacher_id,
+      class_id,
+      password,
+      email_verified,
+      created_at,
+      role,
     };
 
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).insert(

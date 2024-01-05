@@ -1,21 +1,24 @@
 import { StudentDatabase } from "../database/StudentDatabase";
 import { Student } from "../models/Student";
-import {
-  TImageData,
-  TNote,
-  TAnnotation,
-  TStudents,
-  TInactiveStudentsData,
-  TCalendarData,
-  TPasswordResetData,
-  TNotesData,
-  TChatData,
-} from "../types";
+import { TImageData, TNote, TAnnotation, TStudents } from "../models/Student";
 import validUrl from "valid-url";
 import { Buffer } from "buffer";
 import { Request } from "express";
+import { HashManager } from "../services/HashManager";
+import { IdGenerator } from "../services/IdGenerator";
+import { TokenManager } from "../services/TokenManager";
+import {
+  CreateStudentInputDTO,
+  CreateStudentOutputDTO,
+} from "../dtos/student/createStudent.dto";
 
 export class StudentBusiness {
+  constructor(
+    private studentDatabase: StudentDatabase,
+    private idGeneretor: IdGenerator,
+    private tokenManager: TokenManager,
+    private hashManager: HashManager
+  ) {}
   public getStudents = async (nameToFind: string) => {
     const studentDatabase = new StudentDatabase();
     const studentsDB = await studentDatabase.findStudent(nameToFind);
@@ -32,7 +35,11 @@ export class StudentBusiness {
           studentDB.annotations || [],
           studentDB.photo as string | TImageData | null,
           studentDB.teacher_id,
-          studentDB.class_id
+          studentDB.class_id,
+          studentDB.password,
+          studentDB.email_verified,
+          studentDB.created_at,
+          studentDB.role
         )
     );
 
@@ -45,17 +52,25 @@ export class StudentBusiness {
       return students;
     }
   };
-  public createStudent = async (input: any, req: Request) => {
+  public createStudent = async (
+    input: CreateStudentInputDTO,
+    req: Request
+  ): Promise<CreateStudentOutputDTO> => {
     const {
       id,
       name,
-      age,
       email,
       phone,
+      age,
       notes,
       annotations,
+      photo,
       teacher_id,
       class_id,
+      password,
+      email_verified,
+      created_at,
+      role,
     } = input;
 
     if (class_id !== undefined) {
@@ -180,26 +195,38 @@ export class StudentBusiness {
           }
         : null,
       teacher_id,
-      class_id
+      class_id,
+      password,
+      email_verified,
+      created_at,
+      role
     );
     const newStudentDB: TStudents = {
       id: newStudent.getId(),
       name: newStudent.getName(),
-      age: newStudent.getAge(),
       email: newStudent.getEmail(),
       phone: newStudent.getPhone(),
+      age: newStudent.getAge(),
       notes: newStudent.getNotes(),
       annotations: newStudent.getAnnotations(),
+      photo: newStudent.getPhoto(),
       teacher_id: newStudent.getTeacher_id(),
       class_id: newStudent.getClass_id(),
-      photo: newStudent.getPhoto(),
+      password: newStudent.getPassword(),
+      email_verified: newStudent.getEmailVerified(),
+      created_at: newStudent.getCreatedAt(),
+      role: newStudent.getRole(),
     };
 
     await studentDatabase.insertStudent(newStudentDB);
 
-    const output = {
+    const output: CreateStudentOutputDTO = {
       message: "Cadastro realizado com sucesso",
-      student: newStudent,
+      student: {
+        id: newStudent.getId(),
+        name: newStudent.getName(),
+        created_at: newStudent.getCreatedAt(),
+      },
     };
     return output;
   };
