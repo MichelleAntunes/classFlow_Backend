@@ -7,6 +7,10 @@ import { Request } from "express";
 import { HashManager } from "../services/HashManager";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManager";
+import {
+  CreateStudentInputDTO,
+  CreateStudentOutputDTO,
+} from "../dtos/student/createStudent.dto";
 
 export class StudentBusiness {
   constructor(
@@ -48,7 +52,10 @@ export class StudentBusiness {
       return students;
     }
   };
-  public createStudent = async (input: any, req: Request) => {
+  public createStudent = async (
+    input: CreateStudentInputDTO,
+    req: Request
+  ): Promise<CreateStudentOutputDTO> => {
     const {
       id,
       name,
@@ -213,9 +220,13 @@ export class StudentBusiness {
 
     await studentDatabase.insertStudent(newStudentDB);
 
-    const output = {
+    const output: CreateStudentOutputDTO = {
       message: "Cadastro realizado com sucesso",
-      student: newStudent,
+      student: {
+        id: newStudent.getId(),
+        name: newStudent.getName(),
+        created_at: newStudent.getCreatedAt(),
+      },
     };
     return output;
   };

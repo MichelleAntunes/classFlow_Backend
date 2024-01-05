@@ -8,12 +8,12 @@ export interface TImageData {
 }
 export interface TNote {
   id: string; // Add a unique identifier for each note
-  note: string;
+  note?: string;
   // Add any other fields relevant to the note here
 }
 export interface TAnnotation {
   id: string; // Add a unique identifier for each note
-  annotation: string;
+  annotation?: string;
   // Add any other fields relevant to the annotations here
 }
 export interface TokenPayload {
