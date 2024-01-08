@@ -11,6 +11,10 @@ import {
   CreateStudentInputDTO,
   CreateStudentOutputDTO,
 } from "../dtos/student/createStudent.dto";
+import {
+  GetStudentInputDTO,
+  GetStudentOutputDTO,
+} from "../dtos/student/getStudents.dto";
 
 export class StudentBusiness {
   constructor(
@@ -19,39 +23,36 @@ export class StudentBusiness {
     private tokenManager: TokenManager,
     private hashManager: HashManager
   ) {}
-  public getStudents = async (nameToFind: string) => {
-    const studentDatabase = new StudentDatabase();
-    const studentsDB = await studentDatabase.findStudent(nameToFind);
+  public getStudents = async (
+    input: GetStudentInputDTO
+  ): Promise<GetStudentOutputDTO> => {
+    const { q } = input;
+    const studentsDB = await this.studentDatabase.findStudent(q);
 
-    const students: Student[] = studentsDB.map(
-      (studentDB) =>
-        new Student(
-          studentDB.id,
-          studentDB.name,
-          studentDB.email,
-          studentDB.phone,
-          studentDB.age,
-          studentDB.notes || [],
-          studentDB.annotations || [],
-          studentDB.photo as string | TImageData | null,
-          studentDB.teacher_id,
-          studentDB.class_id,
-          studentDB.password,
-          studentDB.email_verified,
-          studentDB.created_at,
-          studentDB.role
-        )
-    );
-
-    if (nameToFind) {
-      const result = students.filter((student) =>
-        student.getName().toLowerCase().includes(nameToFind.toLowerCase())
+    const students = studentsDB.map((studentDB) => {
+      const student = new Student(
+        studentDB.id,
+        studentDB.name,
+        studentDB.email,
+        studentDB.phone,
+        studentDB.age,
+        studentDB.notes || [],
+        studentDB.annotations || [],
+        studentDB.photo as string | TImageData | null,
+        studentDB.teacher_id,
+        studentDB.class_id,
+        studentDB.password,
+        studentDB.email_verified,
+        studentDB.created_at,
+        studentDB.role
       );
-      return result;
-    } else {
-      return students;
-    }
+      return student.toBusinessModel();
+    });
+    const output: GetStudentOutputDTO = students;
+
+    return output;
   };
+
   public createStudent = async (
     input: CreateStudentInputDTO,
     req: Request

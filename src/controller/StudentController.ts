@@ -5,15 +5,17 @@ import { ZodError } from "zod";
 import { StudentBusiness } from "../business/StudentsBusiness";
 import { CreateStudentSchema } from "../dtos/student/createStudent.dto";
 import { BaseError } from "../errors/BaseError";
+import { GetStudentSchema } from "../dtos/student/getStudents.dto";
 
 export class StudentController {
   constructor(private studentBusiness: StudentBusiness) {}
 
   public getStudents = async (req: Request, res: Response) => {
     try {
-      const nameToFind = req.query.name as string;
-      const output = await this.studentBusiness.getStudents(nameToFind);
-
+      const input = GetStudentSchema.parse({
+        q: req.query.q as string | undefined,
+      });
+      const output = await this.studentBusiness.getStudents(input);
       res.status(200).send(output);
     } catch (error) {
       console.log(error);

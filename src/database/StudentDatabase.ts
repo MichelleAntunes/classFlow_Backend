@@ -23,11 +23,21 @@ export class StudentDatabase extends BaseDatabase {
     return studentsDB;
   }
   public async findStudentByID(id: string): Promise<TStudents | null> {
-    const [studentDB] = await BaseDatabase.connection(
+    const [studentDB]: TStudents[] = await BaseDatabase.connection(
       StudentDatabase.TABLE_STUDENT
     ).where({ id });
 
-    return studentDB || null;
+    return studentDB;
+  }
+  public async findStudentByEmail(
+    email: string
+  ): Promise<TStudents | undefined> {
+    const [studentDB]: TStudents[] | undefined[] =
+      await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).where({
+        email,
+      });
+
+    return studentDB;
   }
   public async editStudentByID(
     id: string,
