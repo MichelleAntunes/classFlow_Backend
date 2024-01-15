@@ -1,11 +1,11 @@
 import z from "zod";
-import { TStudentsModel } from "../../models/Student";
+import { StudentModel } from "../../models/Student";
 
 export interface GetStudentInputDTO {
   q: string;
 }
 
-export type GetStudentOutputDTO = TStudentsModel[];
+export type GetStudentOutputDTO = StudentModel[];
 
 export const GetStudentSchema = z
   .object({

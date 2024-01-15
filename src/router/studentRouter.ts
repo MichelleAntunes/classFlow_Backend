@@ -7,7 +7,7 @@ import { TokenManager } from "../services/TokenManager";
 import { HashManager } from "../services/HashManager";
 import multer, { Multer } from "multer";
 
-export const userRouter = express.Router();
+export const studentRouter = express.Router();
 
 const studentController = new StudentController(
   new StudentBusiness(
@@ -35,12 +35,12 @@ const storage = multer.diskStorage({
 });
 const upload: Multer = multer({ storage });
 
-userRouter.get("/students", studentController.getStudents);
-userRouter.post(
+studentRouter.get("/students", studentController.getStudents);
+studentRouter.post(
   "/students",
   upload.single("photo"),
   studentController.createStudent
 );
-userRouter.get("/students/:id", studentController.getStudentById);
-userRouter.put("/students/:id", studentController.editStudentById);
-userRouter.delete("/students/:id", studentController.delteStudentById);
+studentRouter.get("/students/:id", studentController.getStudentById);
+studentRouter.put("/students/:id", studentController.editStudentById);
+studentRouter.delete("/students/:id", studentController.delteStudentById);

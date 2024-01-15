@@ -1,6 +1,6 @@
 import { StudentDatabase } from "../database/StudentDatabase";
-import { Student } from "../models/Student";
-import { TImageData, TNote, TAnnotation, TStudents } from "../models/Student";
+import { Student, StudentModel } from "../models/Student";
+import { TImageData, TNote, TAnnotation, StudentDB } from "../models/Student";
 import validUrl from "valid-url";
 import { Buffer } from "buffer";
 import { Request } from "express";
@@ -15,11 +15,18 @@ import {
   GetStudentInputDTO,
   GetStudentOutputDTO,
 } from "../dtos/student/getStudents.dto";
+import { UnauthorizedError } from "../errors/UnauthorizedError";
+import {
+  EditStudentInputDTO,
+  EditStudentOutputDTO,
+} from "../dtos/student/editStudent.dto";
+import { NotFoundError } from "../errors/NotFoundError";
+import { ForbiddenError } from "../errors/ForbiddenError";
 
 export class StudentBusiness {
   constructor(
     private studentDatabase: StudentDatabase,
-    private idGeneretor: IdGenerator,
+    private idGenerator: IdGenerator,
     private tokenManager: TokenManager,
     private hashManager: HashManager
   ) {}
@@ -27,6 +34,7 @@ export class StudentBusiness {
     input: GetStudentInputDTO
   ): Promise<GetStudentOutputDTO> => {
     const { q } = input;
+
     const studentsDB = await this.studentDatabase.findStudent(q);
 
     const students = studentsDB.map((studentDB) => {
@@ -40,11 +48,15 @@ export class StudentBusiness {
         studentDB.annotations || [],
         studentDB.photo as string | TImageData | null,
         studentDB.teacher_id,
-        studentDB.class_id,
+        studentDB.teacher_name,
+        studentDB.class_Id,
+        studentDB.className,
         studentDB.password,
-        studentDB.email_verified,
-        studentDB.created_at,
-        studentDB.role
+        studentDB.emailVerified,
+        studentDB.createdAt,
+        studentDB.role,
+        studentDB.emailSent,
+        studentDB.updateAt
       );
       return student.toBusinessModel();
     });
@@ -58,7 +70,6 @@ export class StudentBusiness {
     req: Request
   ): Promise<CreateStudentOutputDTO> => {
     const {
-      id,
       name,
       email,
       phone,
@@ -72,7 +83,16 @@ export class StudentBusiness {
       email_verified,
       created_at,
       role,
+      token,
     } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const id = this.idGenerator.generate();
 
     if (class_id !== undefined) {
       if (typeof class_id !== "string" || class_id.length < 1) {
@@ -88,8 +108,8 @@ export class StudentBusiness {
         );
       }
     }
-    if (input.photo) {
-      const photoUrl = input.photo as string;
+    if (photo) {
+      const photoUrl = photo as string;
       if (!validUrl.isUri(photoUrl)) {
         throw new Error("A URL da foto não é válida");
       }
@@ -224,11 +244,77 @@ export class StudentBusiness {
     const output: CreateStudentOutputDTO = {
       message: "Cadastro realizado com sucesso",
       student: {
-        id: newStudent.getId(),
+        token: newStudent.getId(),
         name: newStudent.getName(),
         created_at: newStudent.getCreatedAt(),
       },
     };
+    return output;
+  };
+  public editStudent = async (
+    input: EditStudentInputDTO
+  ): Promise<EditStudentOutputDTO> => {
+    const { token, idToEdit } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const studentDB = await this.studentDatabase.findStudentByID(idToEdit);
+
+    if (!studentDB) {
+      throw new NotFoundError("Estudante com essa ID não encontrado");
+    }
+    if (payload.id !== studentDB.teacher_id) {
+      throw new ForbiddenError("Apenas quem criou o estudante pode editá-lo");
+    }
+
+    const newName = input.name || studentDB.name;
+    const newEmail = input.email || studentDB.email;
+    const newPhone = input.phone || studentDB.phone;
+    const newAge = input.age || studentDB.age;
+    const newPhoto = input.photo || studentDB.photo;
+    const newTeacherId = input.teacher_id || studentDB.teacher_id;
+    const newClassId = input.class_id || studentDB.class_id;
+    const newNote = input.notes || studentDB.notes;
+    const newAnnotation = input.annotations || studentDB.annotations;
+
+    const updatedStudentData: TStudentsModel = {
+      id: idToEdit,
+      name: newName,
+      email: newEmail,
+      phone: newPhone,
+      age: newAge,
+      notes: newNote || studentDB.notes,
+      annotations: newAnnotation || studentDB.annotations,
+      photo: newPhoto,
+      teacher_id: newTeacherId,
+      class_id: newClassId,
+      email_verified: studentDB.email_verified,
+      created_at: studentDB.created_at,
+      role: studentDB.role,
+    };
+
+    await this.studentDatabase.editStudentByID(idToEdit, updatedStudentData);
+    const updatedStudentInstance = await this.studentDatabase.findStudentByID(
+      idToEdit
+    );
+
+    if (!updatedStudentInstance) {
+      throw new NotFoundError(
+        "Estudante com essa ID não encontrado após edição"
+      );
+    }
+    const output: EditStudentOutputDTO = {
+      message: "Edição realizada com sucesso",
+      student: {
+        token: updatedStudentInstance.getId(),
+        name: updatedStudentInstance.getName(),
+        created_at: updatedStudentInstance.getCreate_dAt(),
+      },
+    };
+
     return output;
   };
 }

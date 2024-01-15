@@ -1,12 +1,14 @@
-import { USER_ROLES } from "./Student";
-
+export enum USER_ROLES {
+  NORMAL = "NORMAL",
+  ADMIN = "ADMIN",
+}
 export interface TokenPayload {
   id: string;
   name: string;
   role: USER_ROLES;
 }
 
-export interface TTeacher {
+export interface TeacherDB {
   id: string;
   name: string;
   email: string;
@@ -15,14 +17,18 @@ export interface TTeacher {
   created_at: string;
   role: USER_ROLES;
 }
-export interface TTeacherModel {
+
+// model serve para o front-end lidar com os teacher
+export interface TeacherModel {
   id: string;
   name: string;
   email: string;
-  email_verified: string;
-  created_at: string;
+  emailVerified: string;
+  createdAt: string;
   role: USER_ROLES;
 }
+
+// no back precisamos de acesso a todos os dados, por isso nossa clase tem todos os dados
 
 export class Teacher {
   constructor(
@@ -30,8 +36,8 @@ export class Teacher {
     private name: string,
     private email: string,
     private password: string,
-    private email_verified: string,
-    private created_at: string,
+    private emailVerified: string,
+    private createdAt: string,
     private role: USER_ROLES
   ) {}
   public getId(): string {
@@ -60,16 +66,16 @@ export class Teacher {
     this.password = value;
   }
   public getEmailVerified(): string {
-    return this.email_verified;
+    return this.emailVerified;
   }
   public setEmailVerified(value: string): void {
-    this.email_verified = value;
+    this.emailVerified = value;
   }
   public getCreatedAt(): string {
-    return this.created_at;
+    return this.createdAt;
   }
   public setCreatedAt(value: string): void {
-    this.created_at = value;
+    this.createdAt = value;
   }
   public getRole(): USER_ROLES {
     return this.role;
@@ -78,24 +84,25 @@ export class Teacher {
     this.role = value;
   }
 
-  public toDBModel(): TTeacher {
+  //criar um modelo para o back quando for criar um novo
+  public toDBModel(): TeacherDB {
     return {
       id: this.id,
       name: this.name,
       email: this.email,
       password: this.password,
-      email_verified: this.email_verified,
-      created_at: this.created_at,
+      email_verified: this.emailVerified,
+      created_at: this.createdAt,
       role: this.role,
     };
   }
-  public toBusinessModel(): TTeacherModel {
+  public toBusinessModel(): TeacherModel {
     return {
       id: this.id,
       name: this.name,
       email: this.email,
-      email_verified: this.email_verified,
-      created_at: this.created_at,
+      emailVerified: this.emailVerified,
+      createdAt: this.createdAt,
       role: this.role,
     };
   }

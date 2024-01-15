@@ -7,7 +7,6 @@ import {
 } from "../../models/Student";
 
 export interface CreateStudentInputDTO {
-  id: string;
   name: string;
   email: string;
   phone: number;
@@ -21,12 +20,13 @@ export interface CreateStudentInputDTO {
   email_verified: string;
   created_at: string;
   role: USER_ROLES;
+  token: string;
 }
 
 export interface CreateStudentOutputDTO {
   message: string;
   student: {
-    id: string;
+    token: string;
     name: string;
     created_at: string;
   };
@@ -34,12 +34,7 @@ export interface CreateStudentOutputDTO {
 
 export const CreateStudentSchema = z
   .object({
-    id: z
-      .string({
-        required_error: "'id' é obrigatória",
-        invalid_type_error: "'id' deve ser do tipo string",
-      })
-      .min(1, "'id' deve possuir no mínimo 1 caractere"),
+    token: z.string().min(1),
     name: z
       .string({
         required_error: "'name' é obrigatório",

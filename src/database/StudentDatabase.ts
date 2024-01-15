@@ -1,4 +1,4 @@
-import { TStudents } from "../models/Student";
+import { StudentDB } from "../models/Student";
 import { BaseDatabase } from "./BaseDatabase";
 
 export class StudentDatabase extends BaseDatabase {
@@ -7,13 +7,13 @@ export class StudentDatabase extends BaseDatabase {
   public async findStudent(q: string | undefined) {
     let studentsDB;
     if (q) {
-      const result: TStudents[] = await BaseDatabase.connection(
+      const result: StudentDB[] = await BaseDatabase.connection(
         StudentDatabase.TABLE_STUDENT
       ).where("name", "LIKE", `%${q}%`);
 
       studentsDB = result;
     } else {
-      const result: TStudents[] = await BaseDatabase.connection(
+      const result: StudentDB[] = await BaseDatabase.connection(
         StudentDatabase.TABLE_STUDENT
       );
 
@@ -22,8 +22,8 @@ export class StudentDatabase extends BaseDatabase {
 
     return studentsDB;
   }
-  public async findStudentByID(id: string): Promise<TStudents | null> {
-    const [studentDB]: TStudents[] = await BaseDatabase.connection(
+  public async findStudentByID(id: string): Promise<StudentDB | null> {
+    const [studentDB]: StudentDB[] = await BaseDatabase.connection(
       StudentDatabase.TABLE_STUDENT
     ).where({ id });
 
@@ -31,8 +31,8 @@ export class StudentDatabase extends BaseDatabase {
   }
   public async findStudentByEmail(
     email: string
-  ): Promise<TStudents | undefined> {
-    const [studentDB]: TStudents[] | undefined[] =
+  ): Promise<StudentDB | undefined> {
+    const [studentDB]: StudentDB[] | undefined[] =
       await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).where({
         email,
       });
@@ -52,7 +52,7 @@ export class StudentDatabase extends BaseDatabase {
       .del()
       .where({ id: idToDelete });
   }
-  public async insertStudent(newStudent: TStudents): Promise<void> {
+  public async insertStudent(newStudent: StudentDB): Promise<void> {
     const {
       id,
       name,
@@ -68,6 +68,8 @@ export class StudentDatabase extends BaseDatabase {
       email_verified,
       created_at,
       role,
+      email_sent,
+      updated_at,
     } = newStudent;
 
     // Logic to process the image if a photo file has been uploaded
@@ -79,7 +81,7 @@ export class StudentDatabase extends BaseDatabase {
       mimeType = photo.mimeType;
     }
 
-    const newStudentDB: TStudents = {
+    const newStudentDB: StudentDB = {
       id,
       name,
       email,
@@ -99,6 +101,8 @@ export class StudentDatabase extends BaseDatabase {
       email_verified,
       created_at,
       role,
+      email_sent,
+      updated_at,
     };
 
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).insert(
