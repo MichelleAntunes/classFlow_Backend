@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   TAnnotation,
-  TImageData,
+  ImageData,
   TNote,
   USER_ROLES,
 } from "../../models/Student";
@@ -11,13 +11,14 @@ export interface EditStudentInputDTO {
   email: string;
   phone: number;
   age: number;
-  photo: TImageData | string | null;
+  photo: ImageData | string | null;
   teacher_id: string;
   class_id: string;
   token: string;
   idToEdit: string;
   notes: string[];
   annotations: string[];
+  role: USER_ROLES;
 }
 
 export interface EditStudentOutputDTO {
@@ -35,16 +36,13 @@ export const EditStudentSchema = z
     email: z.string().min(1),
     phone: z.number().min(1),
     age: z.number().min(1),
-    notes: z.array(z.string().min(1)),
-    annotations: z.array(z.string().min(1)),
     photo: z.string().nullable(),
     teacher_id: z.string().min(1),
     class_id: z.string().min(1),
-    password: z.string().min(1),
-    email_verified: z.string().min(1),
-    created_at: z.string().min(1),
-    role: z.string().min(1),
     token: z.string().min(1),
     idToEdit: z.string().min(1),
+    notes: z.array(z.string().min(1)),
+    annotations: z.array(z.string().min(1)),
+    role: z.string().min(1),
   })
   .transform((data) => data as EditStudentInputDTO);

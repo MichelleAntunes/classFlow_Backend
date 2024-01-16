@@ -42,5 +42,5 @@ studentRouter.post(
   studentController.createStudent
 );
 studentRouter.get("/students/:id", studentController.getStudentById);
-studentRouter.put("/students/:id", studentController.editStudentById);
+// studentRouter.put("/students/:id", studentController.editStudentById);
 studentRouter.delete("/students/:id", studentController.delteStudentById);

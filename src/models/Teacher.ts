@@ -8,13 +8,17 @@ export interface TokenPayload {
   role: USER_ROLES;
 }
 
+export interface ImageData {
+  data: Buffer;
+  mimeType?: "image/png" | "image/jpeg";
+}
 export interface TeacherDB {
   id: string;
   name: string;
   email: string;
   password?: string;
-  email_verified: string;
   created_at: string;
+  photo?: ImageData | string | null | undefined;
   role: USER_ROLES;
 }
 
@@ -23,7 +27,6 @@ export interface TeacherModel {
   id: string;
   name: string;
   email: string;
-  emailVerified: string;
   createdAt: string;
   role: USER_ROLES;
 }
@@ -36,9 +39,9 @@ export class Teacher {
     private name: string,
     private email: string,
     private password: string,
-    private emailVerified: string,
     private createdAt: string,
-    private role: USER_ROLES
+    private role: USER_ROLES,
+    private photo?: ImageData | string | null | undefined
   ) {}
   public getId(): string {
     return this.id;
@@ -65,11 +68,26 @@ export class Teacher {
   public setPassword(value: string): void {
     this.password = value;
   }
-  public getEmailVerified(): string {
-    return this.emailVerified;
+  public getPhoto(): ImageData | string | null {
+    if (this.photo && typeof this.photo !== "string") {
+      if ("data" in this.photo) {
+        // Se 'data' está presente, é uma instância de TImageData
+        const imageData = this.photo as ImageData;
+        return {
+          data: Buffer.from(imageData.data), // Convertemos Uint8ClampedArray para Buffer
+          mimeType: imageData.mimeType,
+        };
+      } else {
+        // Caso contrário, pode ser uma instância de ImageData ou outro tipo não esperado
+        // Faça o tratamento apropriado ou retorne null se não souber lidar com o tipo
+        return null;
+      }
+    }
+    return this.photo as string | null;
   }
-  public setEmailVerified(value: string): void {
-    this.emailVerified = value;
+
+  public setPhoto(value: ImageData | string | null): void {
+    this.photo = value;
   }
   public getCreatedAt(): string {
     return this.createdAt;
@@ -91,7 +109,6 @@ export class Teacher {
       name: this.name,
       email: this.email,
       password: this.password,
-      email_verified: this.emailVerified,
       created_at: this.createdAt,
       role: this.role,
     };
@@ -101,7 +118,6 @@ export class Teacher {
       id: this.id,
       name: this.name,
       email: this.email,
-      emailVerified: this.emailVerified,
       createdAt: this.createdAt,
       role: this.role,
     };

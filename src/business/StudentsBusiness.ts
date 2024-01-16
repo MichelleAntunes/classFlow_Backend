@@ -51,11 +51,8 @@ export class StudentBusiness {
         studentDB.teacher_name,
         studentDB.class_Id,
         studentDB.className,
-        studentDB.password,
-        studentDB.emailVerified,
         studentDB.createdAt,
         studentDB.role,
-        studentDB.emailSent,
         studentDB.updateAt
       );
       return student.toBusinessModel();
