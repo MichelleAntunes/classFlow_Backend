@@ -33,7 +33,6 @@ export interface StudentDB {
   annotations?: TAnnotation[]; // Array of annotation objects
   photo?: ImageData | string | null | undefined;
   teacher_id: string;
-  class_id: string;
   created_at: string;
   role: USER_ROLES;
   updated_at: string;
@@ -48,10 +47,6 @@ export interface StudentModel {
   annotations?: TAnnotation[]; // Array of annotation objects
   photo?: ImageData | string | null | undefined;
   teacherId: {
-    id: string;
-    name: string;
-  };
-  classId: {
     id: string;
     name: string;
   };
@@ -72,8 +67,6 @@ export class Student {
     private photo: ImageData | string | null,
     private teacherId: string,
     private teacherName: string,
-    private classId: string,
-    private className: string,
     private createdAt: string,
     private role: USER_ROLES,
     private updatedAt: string
@@ -156,19 +149,6 @@ export class Student {
   public setTeacherName(value: string): void {
     this.teacherId = value;
   }
-  public getClassId(): string {
-    return this.classId;
-  }
-  public setClassId(value: string): void {
-    this.classId = value;
-  }
-  public getClassName(): string {
-    return this.className;
-  }
-  public setClassName(value: string): void {
-    this.className = value;
-  }
-
   public getCreatedAt(): string {
     return this.createdAt;
   }
@@ -200,11 +180,8 @@ export class Student {
       annotations: this.annotations,
       photo: this.photo,
       teacher_id: this.teacherId,
-      class_id: this.classId,
-
       created_at: this.createdAt,
       role: this.role,
-
       updated_at: this.updatedAt,
     };
   }
@@ -221,10 +198,6 @@ export class Student {
       teacherId: {
         id: this.teacherId,
         name: this.teacherName,
-      },
-      classId: {
-        id: this.classId,
-        name: this.className,
       },
       updatedAt: this.updatedAt,
       createdAt: this.createdAt,

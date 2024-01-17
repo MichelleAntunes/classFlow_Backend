@@ -16,7 +16,7 @@ export interface TeacherDB {
   id: string;
   name: string;
   email: string;
-  password?: string;
+  password: string;
   created_at: string;
   photo?: ImageData | string | null | undefined;
   role: USER_ROLES;

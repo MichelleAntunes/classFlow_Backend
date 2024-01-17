@@ -1,3 +1,4 @@
+-- Active: 1705419633255@@127.0.0.1@5432
 
 -- Table teacher (professor): Stores information about teachers.
 
@@ -7,10 +8,9 @@ CREATE TABLE teachers (
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,   
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
-  photo BLOB DEFAULT '../../img/noImageFound.png',
-  role TEXT NOT NULL, 
+  photo BLOB DEFAULT '../img/noImg.jpg',
+  role TEXT NOT NULL
 );
-INSERT INTO teachers (id, name, email, password, role) VALUES ('t01', 'Professor Smith', 'prof.smith@example.com', 'password123', 'ADMIN');
 
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
@@ -23,13 +23,11 @@ CREATE TABLE students (
   annotations TEXT DEFAULT '[Nenhuma anotação]',
   photo BLOB DEFAULT '../../img/noImageFound.png',
   teacher_id TEXT NOT NULL,
-  class_id TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
   role TEXT NOT NULL,
   updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teachers (id)  ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE CASCADE ON UPDATE CASCADE
-);
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id)  ON DELETE CASCADE ON UPDATE CASCADE
+  );
 
 -- Table notes: Stores notes associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE notes (
@@ -62,20 +60,6 @@ CREATE TABLE teacher_student_relationship (
   FOREIGN KEY (teacher_id) REFERENCES teachers (id)ON DELETE CASCADE ON UPDATE CASCADE ,
   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
--- Table class: Represents classes or lists of students associated with a teacher.
-CREATE TABLE classes (
-  id TEXT PRIMARY KEY NOT NULL,
-  name TEXT NOT NULL,
-  teacher_id TEXT NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teachers (id)
-);
-CREATE TABLE student_class_relationship (
-  student_id TEXT NOT NULL,
-  class_id TEXT NOT NULL,
-  PRIMARY KEY (student_id, class_id),
-  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (class_id) REFERENCES classes  (id) ON DELETE CASCADE ON UPDATE CASCADE
-);
 -- Table inactive_students: Stores information about inactive students.
 CREATE TABLE inactive_students (
   id TEXT PRIMARY KEY NOT NULL,
@@ -87,12 +71,10 @@ CREATE TABLE inactive_students (
   annotations TEXT DEFAULT '[Nenhuma anotação]',
   photo BLOB DEFAULT '../../img/noImageFound.png',
   teacher_id TEXT NOT NULL,
-  class_id TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
   role TEXT NOT NULL,
   inactive_at TEXT DEFAULT (DATETIME()) NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Table password_reset teachers
@@ -121,4 +103,19 @@ CREATE TABLE password_reset_teacher (
 --   FOREIGN KEY (teacher_id) REFERENCES teachers (id),
 --   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE
 -- ); DROP TABLE chat; 
+
+-- CREATE TABLE classes (
+--   id TEXT PRIMARY KEY NOT NULL,
+--   name TEXT NOT NULL,
+--   teacher_id TEXT NOT NULL,
+--   FOREIGN KEY (teacher_id) REFERENCES teachers (id)
+-- );
+
+-- CREATE TABLE student_class_relationship (
+--   student_id TEXT NOT NULL,
+--   class_id TEXT NOT NULL,
+--   PRIMARY KEY (student_id, class_id),
+--   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE,
+--   FOREIGN KEY (class_id) REFERENCES classes  (id) ON DELETE CASCADE ON UPDATE CASCADE
+-- );
 

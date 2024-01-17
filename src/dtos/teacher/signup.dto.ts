@@ -10,9 +10,11 @@ export interface SignupOutputDTO {
   token: string;
 }
 
-export const SignupSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(4),
-});
+export const SignupSchema = z
+  .object({
+    name: z.string().min(2),
+    email: z.string().email(),
+    password: z.string().min(4),
+  })
+  .transform((data) => data as SignupInputDTO);
 // melhorar as verificacoes de entradas com o zod
