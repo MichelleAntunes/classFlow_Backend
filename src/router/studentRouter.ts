@@ -40,3 +40,4 @@ studentRouter.post(
   upload.single("photo"),
   studentController.createStudent
 );
+studentRouter.get("/", studentController.getStudents);

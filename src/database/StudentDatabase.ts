@@ -1,10 +1,11 @@
 import { CreateStudentOutputDTO } from "../dtos/student/createStudent.dto";
-import { StudentDB } from "../models/Student";
+import { StudentDB, StudentsWithCreatorName } from "../models/Student";
 import { BaseDatabase } from "./BaseDatabase";
+import { TeacherDataBase } from "./TeacherDatabase";
 
 export class StudentDatabase extends BaseDatabase {
   public static TABLE_STUDENT = "students";
-
+  public static TABLE_TEACHER = "teachers";
   //   public async findStudent(q: string | undefined) {
   //     let studentsDB;
   //     if (q) {
@@ -53,9 +54,38 @@ export class StudentDatabase extends BaseDatabase {
   //       .del()
   //       .where({ id: idToDelete });
   //   }
-  public async insertStudent(studentDB: StudentDB): Promise<void> {
+  public insertStudent = async (studentDB: StudentDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).insert(
       studentDB
     );
-  }
+  };
+
+  public getStudentsWithCreatorName = async (): Promise<
+    StudentsWithCreatorName[]
+  > => {
+    const result = await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
+      .select(
+        `${StudentDatabase.TABLE_STUDENT}.id`,
+        `${StudentDatabase.TABLE_STUDENT}.name`,
+        `${StudentDatabase.TABLE_STUDENT}.email`,
+        `${StudentDatabase.TABLE_STUDENT}.phone`,
+        `${StudentDatabase.TABLE_STUDENT}.age`,
+        `${StudentDatabase.TABLE_STUDENT}.notes`,
+        `${StudentDatabase.TABLE_STUDENT}.annotations`,
+        `${StudentDatabase.TABLE_STUDENT}.photo`,
+        `${StudentDatabase.TABLE_STUDENT}.teacher_id`,
+        `${TeacherDataBase.TABLE_TEACHERS}.name as creator_name`,
+        `${StudentDatabase.TABLE_STUDENT}.created_at`,
+        `${StudentDatabase.TABLE_STUDENT}.role`,
+        `${StudentDatabase.TABLE_STUDENT}.updated_at`
+      )
+      .join(
+        `${TeacherDataBase.TABLE_TEACHERS}`,
+        `${StudentDatabase.TABLE_STUDENT}.teacher_id`,
+        `=`,
+        `${TeacherDataBase.TABLE_TEACHERS}.id`
+      );
+
+    return result as StudentsWithCreatorName[];
+  };
 }

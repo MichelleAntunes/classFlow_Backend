@@ -22,7 +22,21 @@ export interface TAnnotation {
   annotation?: string;
   // Add any other fields relevant to the annotations here
 }
-
+export interface StudentsWithCreatorName {
+  id: string;
+  name: string;
+  email: string;
+  phone: number | null;
+  age: number | null;
+  notes?: TNote[]; // Array of note objects
+  annotations?: TAnnotation[]; // Array of annotation objects
+  photo?: ImageData | string | null | undefined;
+  teacher_id: string;
+  created_at: string;
+  role: USER_ROLES;
+  updated_at: string;
+  creator_name: string;
+}
 export interface StudentDB {
   id: string;
   name: string;

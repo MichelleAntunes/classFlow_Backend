@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { CreateStudentSchema } from "../dtos/student/createStudent.dto";
 import { BaseError } from "../errors/BaseError";
 import { StudentBusiness } from "../business/StudentsBusiness";
+import { GetStudentSchema } from "../dtos/student/getStudents.dto";
 
 export class StudentController {
   constructor(private studentBusiness: StudentBusiness) {}
@@ -38,24 +39,25 @@ export class StudentController {
     }
   };
 
-  // public getStudents = async (req: Request, res: Response) => {
-  //   try {
-  //     const input = GetStudentSchema.parse({
-  //       token: req.headers.authorization,
-  //     });
-  //     const output = await this.studentBusiness.getStudents(input);
-  //     res.status(200).send(output);
-  //   } catch (error) {
-  //     console.log(error);
-  //     if (error instanceof ZodError) {
-  //       res.status(400).send(error.issues);
-  //     } else if (error instanceof BaseError) {
-  //       res.status(error.statusCode).send(error.message);
-  //     } else {
-  //       res.status(500).send("Erro inesperado");
-  //     }
-  //   }
-  // };
+  public getStudents = async (req: Request, res: Response) => {
+    try {
+      const input = GetStudentSchema.parse({
+        token: req.headers.authorization,
+      });
+      const output = await this.studentBusiness.getStudents(input);
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
 
   // public getStudentById = async (req: Request, res: Response) => {
   //   try {
