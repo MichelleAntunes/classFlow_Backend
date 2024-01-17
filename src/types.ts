@@ -1,12 +1,19 @@
-// export enum  {
-// 	por enquanto não há nenhum enum neste projeto
-// }
-
-export type TStudents = {
+export interface TInactiveStudentsData {
   id: string;
   name: string;
   email: string;
-  age: number;
-  telepfone: number;
-  notes: string[];
-};
+  phone?: number;
+  age?: number;
+  notes: string;
+  annotations: string;
+  photo: Buffer;
+  teacher_id: string;
+  class_id: string;
+}
+
+export interface TPasswordResetData {
+  id: number;
+  user_id: string;
+  token: string;
+  expires_at: string;
+}
