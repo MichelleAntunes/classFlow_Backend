@@ -13,6 +13,10 @@ import {
 } from "../dtos/student/createStudent.dto";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { StudentDatabase } from "../database/StudentDatabase";
+import {
+  GetStudentInputDTO,
+  GetStudentOutputDTO,
+} from "../dtos/student/getStudents.dto";
 
 export class StudentBusiness {
   constructor(
@@ -74,38 +78,44 @@ export class StudentBusiness {
       studentName: student.getName(),
     };
   };
+
+  public getStudents = async (
+    input: GetStudentInputDTO
+  ): Promise<GetStudentOutputDTO> => {
+    const { token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const studentsDBWothCreatorName =
+      await this.studentDatabase.getStudentsWithCreatorName();
+
+    const students = studentsDBWothCreatorName.map((studentWithCreatorName) => {
+      const student = new Student(
+        studentWithCreatorName.id,
+        studentWithCreatorName.name,
+        studentWithCreatorName.email,
+        studentWithCreatorName.phone,
+        studentWithCreatorName.age,
+        studentWithCreatorName.notes || [],
+        studentWithCreatorName.annotations || [],
+        studentWithCreatorName.photo as string | ImageData | null,
+        studentWithCreatorName.teacher_id,
+        studentWithCreatorName.creator_name,
+        studentWithCreatorName.updated_at,
+        studentWithCreatorName.role,
+        studentWithCreatorName.created_at
+      );
+      return student.toBusinessModel();
+    });
+    const output: GetStudentOutputDTO = students;
+
+    return output;
+  };
 }
-//   public getStudents = async (
-//     input: GetStudentInputDTO
-//   ): Promise<GetStudentOutputDTO> => {
-//     const { q } = input;
-
-//     const studentsDB = await this.studentDatabase.findStudent(q);
-
-//     const students = studentsDB.map((studentDB) => {
-//       const student = new Student(
-//         studentDB.id,
-//         studentDB.name,
-//         studentDB.email,
-//         studentDB.phone,
-//         studentDB.age,
-//         studentDB.notes || [],
-//         studentDB.annotations || [],
-//         studentDB.photo as string | TImageData | null,
-//         studentDB.teacher_id,
-//         studentDB.teacher_name,
-//         studentDB.class_Id,
-//         studentDB.className,
-//         studentDB.createdAt,
-//         studentDB.role,
-//         studentDB.updateAt
-//       );
-//       return student.toBusinessModel();
-//     });
-//     const output: GetStudentOutputDTO = students;
-
-//     return output;
-//   };
 
 //   public createStudent = async (
 //     input: CreateStudentInputDTO,
@@ -359,4 +369,3 @@ export class StudentBusiness {
 
 //     return output;
 //   };
-// }
