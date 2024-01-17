@@ -17,3 +17,4 @@ export const SignupSchema = z
     password: z.string().min(4),
   })
   .transform((data) => data as SignupInputDTO);
+// melhorar as verificacoes de entradas com o zod

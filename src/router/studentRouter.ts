@@ -4,19 +4,19 @@ import { StudentBusiness } from "../business/StudentsBusiness";
 import { StudentDatabase } from "../database/StudentDatabase";
 import { IdGenerator } from "../services/IdGenerator";
 import { TokenManager } from "../services/TokenManager";
-import { HashManager } from "../services/HashManager";
 import multer, { Multer } from "multer";
 
-export const userRouter = express.Router();
+export const studentRouter = express.Router();
 
 const studentController = new StudentController(
   new StudentBusiness(
     new StudentDatabase(),
     new IdGenerator(),
-    new TokenManager(),
-    new HashManager()
+    new TokenManager()
   )
 );
+studentRouter.use(express.json());
+
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -35,12 +35,8 @@ const storage = multer.diskStorage({
 });
 const upload: Multer = multer({ storage });
 
-userRouter.get("/students", studentController.getStudents);
-userRouter.post(
-  "/students",
+studentRouter.post(
+  "/create",
   upload.single("photo"),
   studentController.createStudent
 );
-userRouter.get("/students/:id", studentController.getStudentById);
-userRouter.put("/students/:id", studentController.editStudentById);
-userRouter.delete("/students/:id", studentController.delteStudentById);

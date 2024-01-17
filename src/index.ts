@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { userRouter } from "./router/studentRouter";
+import { teacherRouter } from "./router/teacherRouter";
+import { studentRouter } from "./router/studentRouter";
 
 dotenv.config();
 
@@ -14,7 +15,8 @@ app.listen(Number(process.env.PORT) || 3003, () => {
   console.log(`Servidor rodando na porta ${Number(process.env.PORT) || 3003}`);
 });
 
-app.use("/students", userRouter);
+app.use("/teachers", teacherRouter);
+app.use("/students", studentRouter);
 
 // app.get("/inactivStudents", async (req: Request, res: Response) => {
 //   try {

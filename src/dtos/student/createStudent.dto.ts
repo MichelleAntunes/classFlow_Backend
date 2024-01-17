@@ -1,59 +1,42 @@
 import z from "zod";
-import {
-  TAnnotation,
-  TImageData,
-  TNote,
-  USER_ROLES,
-} from "../../models/Student";
+import { TAnnotation, TNote, USER_ROLES } from "../../models/Student";
 
 export interface CreateStudentInputDTO {
-  id: string;
   name: string;
   email: string;
   phone: number;
   age: number;
-  notes: TNote[];
-  annotations: TAnnotation[];
-  photo: TImageData | string | null;
-  teacher_id: string;
-  class_id: string;
-  password: string;
-  email_verified: string;
-  created_at: string;
+  notes?: TNote[] | string | undefined;
+  annotations?: TAnnotation[] | string | undefined;
+  photo?: string | undefined;
   role: USER_ROLES;
+  token: string;
 }
 
 export interface CreateStudentOutputDTO {
   message: string;
-  student: {
-    id: string;
-    name: string;
-    created_at: string;
-  };
+  studentName: string;
 }
 
 export const CreateStudentSchema = z
   .object({
-    id: z
-      .string({
-        required_error: "'id' é obrigatória",
-        invalid_type_error: "'id' deve ser do tipo string",
-      })
-      .min(1, "'id' deve possuir no mínimo 1 caractere"),
-    name: z
-      .string({
-        required_error: "'name' é obrigatório",
-        invalid_type_error: "'name' deve ser do tipo string",
-      })
-      .min(2, "'name' deve possuir no mínimo 2 caracteres"),
-    email: z
-      .string({
-        required_error: "'email' é obrigatório",
-        invalid_type_error: "'email' deve ser do tipo string",
-      })
-      .email("'email' inválido"),
+    token: z.string().min(1),
+    name: z.string().min(1),
+    email: z.string().email(),
     phone: z.number(),
     age: z.number().min(1),
-    password: z.string().min(4),
+    notes: z.string().optional(),
+    annotations: z.string().optional(),
+    photo: z
+      .string()
+      .refine((value) => {
+        return (
+          value.startsWith("http") ||
+          value.endsWith(".png") ||
+          value.endsWith(".jpeg")
+        );
+      })
+      .optional(),
+    role: z.string(),
   })
   .transform((data) => data as CreateStudentInputDTO);

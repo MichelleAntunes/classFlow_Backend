@@ -2,7 +2,13 @@ export enum USER_ROLES {
   NORMAL = "NORMAL",
   ADMIN = "ADMIN",
 }
-export interface TImageData {
+
+export interface TokenPayload {
+  id: string;
+  name: string;
+  role: USER_ROLES;
+}
+export interface ImageData {
   data: Buffer;
   mimeType?: "image/png" | "image/jpeg";
 }
@@ -16,12 +22,8 @@ export interface TAnnotation {
   annotation?: string;
   // Add any other fields relevant to the annotations here
 }
-export interface TokenPayload {
-  id: string;
-  name: string;
-  role: USER_ROLES;
-}
-export interface TStudents {
+
+export interface StudentDB {
   id: string;
   name: string;
   email: string;
@@ -29,15 +31,13 @@ export interface TStudents {
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: TImageData | string | null | undefined;
+  photo?: ImageData | string | null | undefined;
   teacher_id: string;
-  class_id: string;
-  password?: string;
-  email_verified: string;
   created_at: string;
   role: USER_ROLES;
+  updated_at: string;
 }
-export interface TStudentsModel {
+export interface StudentModel {
   id: string;
   name: string;
   email: string;
@@ -45,11 +45,13 @@ export interface TStudentsModel {
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: TImageData | string | null | undefined;
-  teacher_id: string;
-  class_id: string;
-  email_verified: string;
-  created_at: string;
+  photo?: ImageData | string | null | undefined;
+  teacherId: {
+    id: string;
+    name: string;
+  };
+  updatedAt: string;
+  createdAt: string;
   role: USER_ROLES;
 }
 
@@ -62,14 +64,14 @@ export class Student {
     private age: number | null,
     private notes: TNote[],
     private annotations: TAnnotation[],
-    private photo: TImageData | string | null,
-    private teacher_id: string,
-    private class_id: string,
-    private password: string | undefined,
-    private email_verified: string,
-    private created_at: string,
-    private role: USER_ROLES
+    private photo: ImageData | string | null,
+    private teacherId: string,
+    private teacherName: string,
+    private createdAt: string,
+    private role: USER_ROLES,
+    private updatedAt: string
   ) {}
+
   public getId(): string {
     return this.id;
   }
@@ -112,11 +114,11 @@ export class Student {
   public setAnnotations(value: TAnnotation[]): void {
     this.annotations = value;
   }
-  public getPhoto(): TImageData | string | null {
+  public getPhoto(): ImageData | string | null {
     if (this.photo && typeof this.photo !== "string") {
       if ("data" in this.photo) {
         // Se 'data' está presente, é uma instância de TImageData
-        const imageData = this.photo as TImageData;
+        const imageData = this.photo as ImageData;
         return {
           data: Buffer.from(imageData.data), // Convertemos Uint8ClampedArray para Buffer
           mimeType: imageData.mimeType,
@@ -130,39 +132,28 @@ export class Student {
     return this.photo as string | null;
   }
 
-  public setPhoto(value: TImageData | string | null): void {
+  public setPhoto(value: ImageData | string | null): void {
     this.photo = value;
   }
-  public getTeacher_id(): string {
-    return this.teacher_id;
+  public getTeacherId(): string {
+    return this.teacherId;
   }
 
-  public setTeacher_id(value: string): void {
-    this.teacher_id = value;
+  public setTeacherId(value: string): void {
+    this.teacherId = value;
   }
-  public getClass_id(): string {
-    return this.class_id;
+  public getTeacherName(): string {
+    return this.teacherName;
   }
-  public setClass_id(value: string): void {
-    this.class_id = value;
-  }
-  public getPassword(): string | undefined {
-    return this.password;
-  }
-  public setPassword(value: string): void {
-    this.password = value;
-  }
-  public getEmailVerified(): string {
-    return this.email_verified;
-  }
-  public setEmailVerified(value: string): void {
-    this.email_verified = value;
+
+  public setTeacherName(value: string): void {
+    this.teacherId = value;
   }
   public getCreatedAt(): string {
-    return this.created_at;
+    return this.createdAt;
   }
   public setCreatedAt(value: string): void {
-    this.created_at = value;
+    this.createdAt = value;
   }
   public getRole(): USER_ROLES {
     return this.role;
@@ -171,7 +162,14 @@ export class Student {
     this.role = value;
   }
 
-  public toDBModel(): TStudents {
+  public getUpdateAt(): string {
+    return this.updatedAt;
+  }
+  public setUpdateAte(value: string): void {
+    this.updatedAt = this.updatedAt;
+  }
+
+  public toDBModel(): StudentDB {
     return {
       id: this.id,
       name: this.name,
@@ -181,15 +179,13 @@ export class Student {
       notes: this.notes,
       annotations: this.annotations,
       photo: this.photo,
-      teacher_id: this.teacher_id,
-      class_id: this.class_id,
-      password: this.password,
-      email_verified: this.email_verified,
-      created_at: this.created_at,
+      teacher_id: this.teacherId,
+      created_at: this.createdAt,
       role: this.role,
+      updated_at: this.updatedAt,
     };
   }
-  public toBusinessModel(): TStudentsModel {
+  public toBusinessModel(): StudentModel {
     return {
       id: this.id,
       name: this.name,
@@ -199,10 +195,12 @@ export class Student {
       notes: this.notes,
       annotations: this.annotations,
       photo: this.photo,
-      teacher_id: this.teacher_id,
-      class_id: this.class_id,
-      email_verified: this.email_verified,
-      created_at: this.created_at,
+      teacherId: {
+        id: this.teacherId,
+        name: this.teacherName,
+      },
+      updatedAt: this.updatedAt,
+      createdAt: this.createdAt,
       role: this.role,
     };
   }
