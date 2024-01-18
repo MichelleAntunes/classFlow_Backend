@@ -17,6 +17,12 @@ import {
   GetStudentInputDTO,
   GetStudentOutputDTO,
 } from "../dtos/student/getStudents.dto";
+import {
+  EditStudentInputDTO,
+  EditStudentOutputDTO,
+} from "../dtos/student/editStudent.dto";
+import { NotFoundError } from "../errors/NotFoundError";
+import { ForbiddenError } from "../errors/ForbiddenError";
 
 export class StudentBusiness {
   constructor(
@@ -112,6 +118,53 @@ export class StudentBusiness {
       return student.toBusinessModel();
     });
     const output: GetStudentOutputDTO = students;
+
+    return output;
+  };
+  public editStudent = async (
+    input: EditStudentInputDTO
+  ): Promise<EditStudentOutputDTO> => {
+    const { name, token, idToEdit } = input;
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const studentDB = await this.studentDatabase.findStudentById(idToEdit);
+
+    if (!studentDB) {
+      throw new NotFoundError("Estudante com essa id não existe");
+    }
+
+    if (payload.id !== studentDB.teacher_id) {
+      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+    }
+
+    const student = new Student(
+      studentDB.id,
+      studentDB.name,
+      studentDB.email,
+      studentDB.phone,
+      studentDB.age,
+      studentDB.notes || [],
+      studentDB.annotations || [],
+      studentDB.phone as string | ImageData | null,
+      studentDB.teacher_id,
+      payload.name,
+      studentDB.created_at,
+      studentDB.role,
+      studentDB.updated_at
+    );
+
+    student.setName(name);
+
+    const updatedStudentDB = student.toDBModel();
+
+    await this.studentDatabase.updateStudent(updatedStudentDB);
+
+    const output: EditStudentOutputDTO = {
+      message: "Edição realizada com sucesso",
+    };
 
     return output;
   };

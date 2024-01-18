@@ -41,3 +41,4 @@ studentRouter.post(
   studentController.createStudent
 );
 studentRouter.get("/", studentController.getStudents);
+studentRouter.put("/:id", studentController.editStudent);
