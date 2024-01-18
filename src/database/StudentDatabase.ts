@@ -88,4 +88,19 @@ export class StudentDatabase extends BaseDatabase {
 
     return result as StudentsWithCreatorName[];
   };
+  public async findStudentById(id: string): Promise<StudentDB | undefined> {
+    const [studentDB]: StudentDB[] | undefined = await BaseDatabase.connection(
+      StudentDatabase.TABLE_STUDENT
+    )
+      .select()
+      .where({ id });
+
+    return studentDB;
+  }
+
+  public updateStudent = async (studentDB: StudentDB): Promise<void> => {
+    await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
+      .update(studentDB)
+      .where({ id: studentDB.id });
+  };
 }
