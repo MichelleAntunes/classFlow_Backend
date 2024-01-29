@@ -103,4 +103,10 @@ export class StudentDatabase extends BaseDatabase {
       .update(studentDB)
       .where({ id: studentDB.id });
   };
+
+  public deleteStudentById = async (id: string): Promise<void> => {
+    await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
+      .delete()
+      .where({ id });
+  };
 }
