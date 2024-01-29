@@ -1,3 +1,5 @@
+import { IdGenerator } from "../services/IdGenerator";
+
 export enum USER_ROLES {
   NORMAL = "NORMAL",
   ADMIN = "ADMIN",
@@ -26,7 +28,7 @@ export interface StudentsWithCreatorName {
   id: string;
   name: string;
   email: string;
-  phone: number | null;
+  phone: string | null;
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
@@ -41,7 +43,7 @@ export interface StudentDB {
   id: string;
   name: string;
   email: string;
-  phone: number | null;
+  phone: string | null;
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
@@ -55,7 +57,7 @@ export interface StudentModel {
   id: string;
   name: string;
   email: string;
-  phone: number | null;
+  phone: string | null;
   age: number | null;
   notes?: TNote[]; // Array of note objects
   annotations?: TAnnotation[]; // Array of annotation objects
@@ -74,17 +76,30 @@ export class Student {
     private id: string,
     private name: string,
     private email: string,
-    private phone: number | null,
+    private phone: string | null,
     private age: number | null,
     private notes: TNote[],
     private annotations: TAnnotation[],
-    private photo: ImageData | string | null,
     private teacherId: string,
     private teacherName: string,
     private createdAt: string,
     private role: USER_ROLES,
-    private updatedAt: string
+    private updatedAt: string,
+    private photo: ImageData | string | null
   ) {}
+  public addNewAnnotations(
+    newAnnotations: string[],
+    idGenerator: IdGenerator
+  ): void {
+    const newAnnotationObjects: TAnnotation[] = newAnnotations.map(
+      (annotation) => ({
+        id: idGenerator.generate(),
+        annotation,
+      })
+    );
+
+    this.annotations = [...this.annotations, ...newAnnotationObjects];
+  }
 
   public getId(): string {
     return this.id;
@@ -104,10 +119,10 @@ export class Student {
   public setEmail(value: string): void {
     this.email = value;
   }
-  public getPhone(): number | null {
+  public getPhone(): string | null {
     return this.phone;
   }
-  public setPhone(value: number): void {
+  public setPhone(value: string): void {
     this.phone = value;
   }
   public getAge(): number | null {
