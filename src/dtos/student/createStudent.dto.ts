@@ -9,7 +9,7 @@ export interface CreateStudentInputDTO {
   notes: string[];
   annotations: string[];
   role: USER_ROLES;
-  photo?: string | undefined;
+  photo: string;
   token: string;
 }
 

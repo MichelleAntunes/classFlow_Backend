@@ -28,11 +28,11 @@ export interface StudentsWithCreatorName {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
-  age: number | null;
-  notes?: TNote[]; // Array of note objects
-  annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: ImageData | string | null | undefined;
+  phone: string;
+  age: number;
+  notes: TNote[]; // Array of note objects
+  annotations: TAnnotation[]; // Array of annotation objects
+  photo: ImageData | string;
   teacher_id: string;
   created_at: string;
   role: USER_ROLES;
@@ -43,11 +43,11 @@ export interface StudentDB {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
-  age: number | null;
-  notes?: TNote[]; // Array of note objects
-  annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: ImageData | string | null | undefined;
+  phone: string;
+  age: number;
+  notes: TNote[]; // Array of note objects
+  annotations: TAnnotation[]; // Array of annotation objects
+  photo: ImageData | string;
   teacher_id: string;
   created_at: string;
   role: USER_ROLES;
@@ -57,11 +57,11 @@ export interface StudentModel {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
-  age: number | null;
-  notes?: TNote[]; // Array of note objects
-  annotations?: TAnnotation[]; // Array of annotation objects
-  photo?: ImageData | string | null | undefined;
+  phone: string;
+  age: number;
+  notes: TNote[]; // Array of note objects
+  annotations: TAnnotation[]; // Array of annotation objects
+  photo: ImageData | string;
   teacherId: {
     id: string;
     name: string;
@@ -76,16 +76,16 @@ export class Student {
     private id: string,
     private name: string,
     private email: string,
-    private phone: string | null,
-    private age: number | null,
-    private notes: TNote[],
-    private annotations: TAnnotation[],
+    private phone: string,
+    private age: number,
+    private notes: TNote[] = [],
+    private annotations: TAnnotation[] = [],
     private teacherId: string,
     private teacherName: string,
     private createdAt: string,
     private role: USER_ROLES,
     private updatedAt: string,
-    private photo: ImageData | string | null
+    private photo: ImageData | string
   ) {}
   public addNewAnnotations(
     newAnnotations: string[],
@@ -161,7 +161,7 @@ export class Student {
     return this.photo as string | null;
   }
 
-  public setPhoto(value: ImageData | string | null): void {
+  public setPhoto(value: ImageData | string): void {
     this.photo = value;
   }
   public getTeacherId(): string {

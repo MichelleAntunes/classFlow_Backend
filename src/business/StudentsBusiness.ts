@@ -37,7 +37,7 @@ export class StudentBusiness {
   ): Promise<CreateStudentOutputDTO> => {
     const { name, email, phone, age, notes, annotations, photo, role, token } =
       input;
-    console.log("Processing createStudent with input:", input);
+
     const payload = this.tokenManager.getPayload(token);
 
     if (!payload) {
@@ -75,7 +75,7 @@ export class StudentBusiness {
       currentDate.toISOString(),
       role,
       currentDate.toISOString(),
-      photo || null
+      photo
     );
     console.log("Created student object:", student);
     const studentDB = student.toDBModel();
@@ -101,24 +101,49 @@ export class StudentBusiness {
       throw new UnauthorizedError();
     }
 
-    const studentsDBWothCreatorName =
+    const studentsDBWithCreatorName =
       await this.studentDatabase.getStudentsWithCreatorName();
 
-    const students = studentsDBWothCreatorName.map((studentWithCreatorName) => {
+    const students = studentsDBWithCreatorName.map((studentWithCreatorName) => {
+      console.log("notes:", studentWithCreatorName.notes);
+      console.log("annotations:", studentWithCreatorName.annotations);
+      let notes = [];
+      if (Array.isArray(studentWithCreatorName.notes)) {
+        notes = studentWithCreatorName.notes;
+      } else if (typeof studentWithCreatorName.notes === "string") {
+        try {
+          notes = JSON.parse(studentWithCreatorName.notes);
+        } catch (error) {
+          console.error("Erro ao fazer o parse da string JSON:", error);
+        }
+      }
+
+      let annotations = [];
+
+      if (Array.isArray(studentWithCreatorName.annotations)) {
+        annotations = studentWithCreatorName.annotations;
+      } else if (typeof studentWithCreatorName.annotations === "string") {
+        try {
+          annotations = JSON.parse(studentWithCreatorName.annotations);
+        } catch (error) {
+          console.error("Erro ao fazer o parse da string JSON:", error);
+        }
+      }
+
       const student = new Student(
         studentWithCreatorName.id,
         studentWithCreatorName.name,
         studentWithCreatorName.email,
         studentWithCreatorName.phone,
         studentWithCreatorName.age,
-        studentWithCreatorName.notes || [],
-        studentWithCreatorName.annotations || [],
+        notes,
+        annotations,
         studentWithCreatorName.teacher_id,
         studentWithCreatorName.creator_name,
         studentWithCreatorName.created_at,
         studentWithCreatorName.role,
         studentWithCreatorName.updated_at,
-        studentWithCreatorName.photo as string | ImageData | null
+        studentWithCreatorName.photo as string | ImageData
       );
       return student.toBusinessModel();
     });
@@ -168,7 +193,7 @@ export class StudentBusiness {
       studentDB.created_at,
       studentDB.role,
       studentDB.updated_at,
-      studentDB.photo as string | ImageData | null
+      studentDB.photo as string | ImageData
     );
 
     student.setName(studentName);
@@ -279,7 +304,7 @@ export class StudentBusiness {
       studentDB.created_at,
       studentDB.role,
       studentDB.updated_at,
-      studentDB.photo as ImageData | string | null
+      studentDB.photo as ImageData | string
     );
 
     return student;
