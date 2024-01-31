@@ -1,6 +1,6 @@
 import z from "zod";
 export interface EditStudentInputDTO {
-  studentName: string;
+  name: string;
   token: string;
   idToEdit: string;
   age: number;
@@ -17,8 +17,9 @@ export interface EditStudentOutputDTO {
 
 export const EditStudentSchema = z
   .object({
-    studentName: z.string().min(1).optional(),
+    name: z.string().min(1).optional(),
     token: z.string().min(1),
+
     idToEdit: z.string().min(1),
     age: z.number().min(1).optional(),
     email: z.string().email().optional(),

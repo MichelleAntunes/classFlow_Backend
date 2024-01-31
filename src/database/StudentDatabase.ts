@@ -1,5 +1,5 @@
 import { CreateStudentOutputDTO } from "../dtos/student/createStudent.dto";
-import { StudentDB, StudentsWithCreatorName } from "../models/Student";
+import { StudentDB, StudentsWithCreatorName, TNote } from "../models/Student";
 import { BaseDatabase } from "./BaseDatabase";
 import { TeacherDataBase } from "./TeacherDatabase";
 
@@ -108,5 +108,11 @@ export class StudentDatabase extends BaseDatabase {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
       .delete()
       .where({ id });
+  };
+
+  public addNewNote = async (studentDB: StudentDB): Promise<void> => {
+    await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
+      .update({ notes: studentDB.notes })
+      .where({ id: studentDB.id });
   };
 }
