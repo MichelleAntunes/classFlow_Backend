@@ -24,6 +24,11 @@ import {
   DeleteStudentOutputDTO,
 } from "../dtos/student/deleteStudent.dto";
 import { USER_ROLES } from "../models/Teacher";
+import { emit } from "process";
+import {
+  AddNewNoteInputDTO,
+  AddNewNoteOutputDTO,
+} from "../dtos/student/addNewNote.dto";
 
 export class StudentBusiness {
   constructor(
@@ -35,9 +40,9 @@ export class StudentBusiness {
   public createStudent = async (
     input: CreateStudentInputDTO
   ): Promise<CreateStudentOutputDTO> => {
-    const { name, email, phone, age, notes, annotations, photo, role, token } =
-      input;
-    console.log("Processing createStudent with input:", input);
+    const { name, email, phone, age, photo, role, token } = input;
+    console.log("Recebido input", input);
+
     const payload = this.tokenManager.getPayload(token);
 
     if (!payload) {
@@ -45,20 +50,6 @@ export class StudentBusiness {
     }
 
     const id = this.idGenerator.generate();
-    const processProperty = (
-      property: string[] | string | undefined
-    ): TNote[] => {
-      if (Array.isArray(property)) {
-        return property.map((note) => ({ id: "uniqueId", note }));
-      } else if (typeof property === "string") {
-        return [{ id: "uniqueId", note: property }];
-      } else {
-        return [];
-      }
-    };
-
-    const notesArray = processProperty(notes);
-    const annotationsArray = processProperty(annotations);
 
     const currentDate = new Date();
 
@@ -68,14 +59,14 @@ export class StudentBusiness {
       email,
       phone,
       age,
-      notesArray,
-      annotationsArray,
+      [],
+      [],
       payload.id,
       payload.name,
       currentDate.toISOString(),
       role,
       currentDate.toISOString(),
-      photo || null
+      photo
     );
     console.log("Created student object:", student);
     const studentDB = student.toDBModel();
@@ -101,101 +92,28 @@ export class StudentBusiness {
       throw new UnauthorizedError();
     }
 
-    const studentsDBWothCreatorName =
+    const studentsDBWithCreatorName =
       await this.studentDatabase.getStudentsWithCreatorName();
 
-    const students = studentsDBWothCreatorName.map((studentWithCreatorName) => {
+    const students = studentsDBWithCreatorName.map((studentWithCreatorName) => {
       const student = new Student(
         studentWithCreatorName.id,
         studentWithCreatorName.name,
         studentWithCreatorName.email,
         studentWithCreatorName.phone,
         studentWithCreatorName.age,
-        studentWithCreatorName.notes || [],
-        studentWithCreatorName.annotations || [],
+        studentWithCreatorName.notes as TNote[],
+        studentWithCreatorName.annotations as TAnnotation[],
         studentWithCreatorName.teacher_id,
         studentWithCreatorName.creator_name,
         studentWithCreatorName.created_at,
         studentWithCreatorName.role,
         studentWithCreatorName.updated_at,
-        studentWithCreatorName.photo as string | ImageData | null
+        studentWithCreatorName.photo as string | ImageData
       );
       return student.toBusinessModel();
     });
     const output: GetStudentOutputDTO = students;
-
-    return output;
-  };
-  public editStudent = async (
-    input: EditStudentInputDTO
-  ): Promise<EditStudentOutputDTO> => {
-    const {
-      studentName,
-      idToEdit,
-      token,
-      age,
-      email,
-      phone,
-      notes,
-      annotations,
-      photo,
-    } = input;
-    const payload = this.tokenManager.getPayload(token);
-
-    if (!payload) {
-      throw new UnauthorizedError();
-    }
-    const studentDB = await this.studentDatabase.findStudentById(idToEdit);
-
-    if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
-    }
-
-    if (payload.id !== studentDB.teacher_id) {
-      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
-    }
-
-    const student = new Student(
-      studentDB.id,
-      studentDB.name,
-      studentDB.email,
-      studentDB.phone,
-      studentDB.age,
-      studentDB.notes || [],
-      studentDB.annotations || [],
-      studentDB.teacher_id,
-      payload.name,
-      studentDB.created_at,
-      studentDB.role,
-      studentDB.updated_at,
-      studentDB.photo as string | ImageData | null
-    );
-
-    student.setName(studentName);
-    student.setAge(age);
-    student.setEmail(email);
-    student.setPhone(phone);
-    const mappedNotes = notes.map((note) => ({
-      id: this.idGenerator.generate(),
-      note,
-    }));
-    const mappedAnnotations = annotations.map((annotation) => ({
-      id: this.idGenerator.generate(),
-      annotation,
-    }));
-
-    student.setNotes([...student.getNotes(), ...mappedNotes]);
-    student.setAnnotations([...student.getAnnotations(), ...mappedAnnotations]);
-
-    student.setPhoto(photo);
-
-    const updatedStudentDB = student.toDBModel();
-
-    await this.studentDatabase.updateStudent(updatedStudentDB);
-
-    const output: EditStudentOutputDTO = {
-      message: "Edição realizada com sucesso",
-    };
 
     return output;
   };
@@ -232,25 +150,57 @@ export class StudentBusiness {
     return output;
   };
 
-  public addNewAnnotations(
-    student: Student,
-    newAnnotations: string[],
-    token: string,
-    idGenerator: IdGenerator
-  ) {
+  public addNewNote = async (
+    input: AddNewNoteInputDTO
+  ): Promise<AddNewNoteOutputDTO> => {
+    const { token, idToEdit, notes } = input;
     const payload = this.tokenManager.getPayload(token);
-    const newAnnotationObjects: TAnnotation[] = newAnnotations.map(
-      (annotation) => ({
-        id: idGenerator.generate(),
-        annotation,
-      })
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const studentDB = await this.studentDatabase.findStudentById(idToEdit);
+
+    if (!studentDB) {
+      throw new NotFoundError("Estudante com essa id não existe");
+    }
+
+    if (payload.id !== studentDB.teacher_id) {
+      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+    }
+
+    const student = new Student(
+      studentDB.id,
+      studentDB.name,
+      studentDB.email,
+      studentDB.phone,
+      studentDB.age,
+      studentDB.notes || [],
+      studentDB.annotations || [],
+      studentDB.teacher_id,
+      payload.name,
+      studentDB.created_at,
+      studentDB.role,
+      studentDB.updated_at,
+      studentDB.photo as string | ImageData
     );
 
-    student.setAnnotations([
-      ...student.getAnnotations(),
-      ...newAnnotationObjects,
-    ]);
-  }
+    const newNoteObjects: TNote[] = notes.map((note) => ({
+      id: this.idGenerator.generate(),
+      note: [note],
+    }));
+    student.setNotes([...student.getNotes(), ...newNoteObjects]);
+
+    const updatedStudentDB = student.toDBModel();
+
+    await this.studentDatabase.addNewNote(updatedStudentDB);
+
+    const output: EditStudentOutputDTO = {
+      message: "Nova nota adicionada com sucesso",
+    };
+
+    return output;
+  };
 
   public findStudentById = async (
     id: string,
@@ -279,9 +229,61 @@ export class StudentBusiness {
       studentDB.created_at,
       studentDB.role,
       studentDB.updated_at,
-      studentDB.photo as ImageData | string | null
+      studentDB.photo as ImageData | string
     );
 
     return student;
+  };
+
+  public editStudent = async (
+    input: EditStudentInputDTO
+  ): Promise<EditStudentOutputDTO> => {
+    const { name, token, idToEdit, age, email, phone, photo } = input;
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const studentDB = await this.studentDatabase.findStudentById(idToEdit);
+
+    if (!studentDB) {
+      throw new NotFoundError("Estudante com essa id não existe");
+    }
+
+    if (payload.id !== studentDB.teacher_id) {
+      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+    }
+
+    const student = new Student(
+      studentDB.id,
+      studentDB.name,
+      studentDB.email,
+      studentDB.phone,
+      studentDB.age,
+      studentDB.notes || [],
+      studentDB.annotations || [],
+      studentDB.teacher_id,
+      payload.name,
+      studentDB.created_at,
+      studentDB.role,
+      studentDB.updated_at,
+      studentDB.photo as string | ImageData
+    );
+
+    student.setName(name);
+    student.setEmail(email);
+    student.setPhone(phone);
+    student.setAge(age);
+    student.setPhoto(photo);
+
+    const updatedStudentDB = student.toDBModel();
+
+    await this.studentDatabase.updateStudent(updatedStudentDB);
+
+    const output: EditStudentOutputDTO = {
+      message: "Edição realizada com sucesso",
+    };
+
+    return output;
   };
 }

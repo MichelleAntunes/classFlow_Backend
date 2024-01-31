@@ -6,10 +6,8 @@ export interface CreateStudentInputDTO {
   email: string;
   phone: string;
   age: number;
-  notes: string[];
-  annotations: string[];
   role: USER_ROLES;
-  photo?: string | undefined;
+  photo: string;
   token: string;
 }
 
@@ -29,8 +27,6 @@ export const CreateStudentSchema = z
         message: "'phone' deve ser um número de telefone válido",
       }),
     age: z.number().min(1),
-    notes: z.array(z.string()).default([]),
-    annotations: z.array(z.string()).default([]),
     role: z.string(),
     photo: z
       .string()
