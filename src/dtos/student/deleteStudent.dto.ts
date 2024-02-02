@@ -12,12 +12,6 @@ export interface DeleteStudentOutputDTO {
 export const DeleteStudentSchema = z
   .object({
     token: z.string(),
-    idToEdit: z.string(), // Certifique-se de que está definido como uma string
+    idToDelete: z.string(), // Certifique-se de que está definido como uma string
   })
-  .transform(
-    (data) =>
-      ({
-        token: data.token,
-        idToDelete: data.idToEdit as string, // Ajuste aqui
-      } as DeleteStudentInputDTO)
-  );
+  .transform((data) => data as DeleteStudentInputDTO);
