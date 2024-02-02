@@ -1,5 +1,5 @@
 import z from "zod";
-import { TAnnotation, TNote, USER_ROLES } from "../../models/Student";
+import { USER_ROLES } from "../../models/Student";
 
 export interface CreateStudentInputDTO {
   name: string;

@@ -18,9 +18,8 @@ CREATE TABLE students (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   phone INTEGER,
-  age INTEGER,
-  notes TEXT DEFAULT '[Nenhuma nota]',
-  annotations TEXT DEFAULT '[Nenhuma anotação]',
+  age INTEGER,  
+  notes TEXT DEFAULT 'Nenhuma nota',
   photo BLOB DEFAULT '../../img/noImageFound.png',
   teacher_id TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
@@ -28,18 +27,21 @@ CREATE TABLE students (
   updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
   FOREIGN KEY (teacher_id) REFERENCES teachers (id)  ON DELETE CASCADE ON UPDATE CASCADE
   );
-
+DROP TABLE students;
 -- Table notes: Stores notes associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 CREATE TABLE notes (
   id TEXT PRIMARY KEY,
-  student_id TEXT UNIQUE NOT NULL,
-  teacher_id TEXT UNIQUE NOT NULL,
-  note TEXT NOT NULL,  
-  created_at TEXT DEFAULT (DATETIME()) NOT NULL,
-  updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
-  FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE
+  student_id TEXT,
+  teacher_id TEXT,
+  notes TEXT,
+  created_at DATETIME,
+  updated_at DATETIME,
+  UNIQUE (teacher_id, student_id, id),
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
+
+DROP TABLE notes;
 -- Table annotations: Stores annotations associated with students, with foreign keys student_id and teacher_id referencing the students and teachers tables, respectively.
 
 CREATE TABLE annotations (
