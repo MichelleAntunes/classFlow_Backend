@@ -34,9 +34,16 @@ const storage = multer.diskStorage({
   },
 });
 const upload: Multer = multer({ storage });
-
+//Students
 studentRouter.post(
   "/create",
   upload.single("photo"),
   studentController.createStudent
 );
+studentRouter.get("/", studentController.getStudents);
+studentRouter.put("/:id", studentController.editStudent);
+studentRouter.delete("/:id", studentController.deleteStudent);
+//Notes
+studentRouter.put("/note/:studentId", studentController.createNotesByStudentId);
+studentRouter.delete("/note/:id", studentController.deleteNotesByNoteId);
+studentRouter.put("/noteee/:noteid", studentController.editNoteByNoteId);

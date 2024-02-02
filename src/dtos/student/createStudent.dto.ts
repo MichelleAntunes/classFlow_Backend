@@ -1,15 +1,13 @@
 import z from "zod";
-import { TAnnotation, TNote, USER_ROLES } from "../../models/Student";
+import { USER_ROLES } from "../../models/Student";
 
 export interface CreateStudentInputDTO {
   name: string;
   email: string;
-  phone: number;
+  phone: string;
   age: number;
-  notes?: TNote[] | string | undefined;
-  annotations?: TAnnotation[] | string | undefined;
-  photo?: string | undefined;
   role: USER_ROLES;
+  photo: string;
   token: string;
 }
 
@@ -23,20 +21,26 @@ export const CreateStudentSchema = z
     token: z.string().min(1),
     name: z.string().min(1),
     email: z.string().email(),
-    phone: z.number(),
+    phone: z
+      .string()
+      .refine((value) => /^(?:\+|\d{0,4}\s?)?\d{6,14}$/.test(value), {
+        message: "'phone' deve ser um número de telefone válido",
+      }),
     age: z.number().min(1),
-    notes: z.string().optional(),
-    annotations: z.string().optional(),
+    role: z.string(),
     photo: z
       .string()
-      .refine((value) => {
-        return (
-          value.startsWith("http") ||
-          value.endsWith(".png") ||
-          value.endsWith(".jpeg")
-        );
-      })
+      .refine(
+        (value) => {
+          const isURL = /^(ftp|http|https):\/\/[^ "]+$/.test(value);
+          const isImageData = /^data:image\/.+/.test(value);
+
+          return isURL || isImageData;
+        },
+        {
+          message: "'photo' deve ser uma URL válida ou em formatos JPEG pu PNG",
+        }
+      )
       .optional(),
-    role: z.string(),
   })
   .transform((data) => data as CreateStudentInputDTO);
