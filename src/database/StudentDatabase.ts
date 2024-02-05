@@ -13,6 +13,7 @@ export class StudentDatabase extends BaseDatabase {
   public static TABLE_TEACHER = "teachers";
   public static TABLE_NOTES = "notes";
   public static TABLE_ANNOTATIONS = "annotations";
+
   //Students
   public insertStudent = async (studentDB: StudentDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).insert({
@@ -45,72 +46,37 @@ export class StudentDatabase extends BaseDatabase {
         `${StudentDatabase.TABLE_STUDENT}.updated_at`,
         `${StudentDatabase.TABLE_STUDENT}.photo`,
         `${TeacherDataBase.TABLE_TEACHERS}.name as creator_name`,
-        `${StudentDatabase.TABLE_NOTES}.id as notesId`,
-        `${StudentDatabase.TABLE_NOTES}.notes as notesText`,
-        `${StudentDatabase.TABLE_ANNOTATIONS}.id as annotationsId`,
-        `${StudentDatabase.TABLE_ANNOTATIONS}.annotations as annotationsText`
+        BaseDatabase.connection.raw(
+          `(SELECT JSON_GROUP_ARRAY(JSON_OBJECT('notesId', id, 'notesText', notes)) FROM ${StudentDatabase.TABLE_NOTES} WHERE student_id = ${StudentDatabase.TABLE_STUDENT}.id) as notes`
+        ),
+        BaseDatabase.connection.raw(
+          `(SELECT JSON_GROUP_ARRAY(JSON_OBJECT('annotationsId', id, 'annotationsText', annotations)) FROM ${StudentDatabase.TABLE_ANNOTATIONS} WHERE student_id = ${StudentDatabase.TABLE_STUDENT}.id) as annotations`
+        )
       )
       .join(
         `${TeacherDataBase.TABLE_TEACHERS}`,
         `${StudentDatabase.TABLE_STUDENT}.teacher_id`,
         "=",
         `${TeacherDataBase.TABLE_TEACHERS}.id`
-      )
-      .leftJoin(
-        `${StudentDatabase.TABLE_NOTES}`,
-        `${StudentDatabase.TABLE_STUDENT}.id`,
-        "=",
-        `${StudentDatabase.TABLE_NOTES}.student_id`
-      )
-      .leftJoin(
-        `${StudentDatabase.TABLE_ANNOTATIONS}`,
-        `${StudentDatabase.TABLE_STUDENT}.id`,
-        "=",
-        `${StudentDatabase.TABLE_ANNOTATIONS}.student_id`
       );
 
-    const groupedResult = result.reduce(
-      (acc: StudentsWithCreatorName[], row) => {
-        const existingStudent = acc.find((student) => student.id === row.id);
-
-        if (existingStudent) {
-          if (row.notesId) {
-            existingStudent.notes.push({
-              notesId: row.notesId,
-              notesText: row.notesText,
-            });
-          }
-        } else {
-          acc.push({
-            id: row.id,
-            name: row.name,
-            email: row.email,
-            phone: row.phone,
-            age: row.age,
-            teacher_id: row.teacher_id,
-            creator_name: row.creator_name,
-            created_at: row.created_at,
-            role: row.role,
-            updated_at: row.updated_at,
-            photo: row.photo,
-            notes: row.notesId
-              ? [{ notesId: row.notesId, notesText: row.notesText }]
-              : [],
-            annotations: row.annotationsId
-              ? [
-                  {
-                    annotationsId: row.notesId,
-                    annotationsText: row.annotationsText,
-                  },
-                ]
-              : [],
-          });
-        }
-
-        return acc;
-      },
-      []
-    );
+    const groupedResult = result.map((row: any) => {
+      return {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        age: row.age,
+        teacher_id: row.teacher_id,
+        creator_name: row.creator_name,
+        created_at: row.created_at,
+        role: row.role,
+        updated_at: row.updated_at,
+        photo: row.photo,
+        notes: JSON.parse(row.notes),
+        annotations: JSON.parse(row.annotations),
+      };
+    });
 
     return groupedResult;
   };
@@ -181,5 +147,22 @@ export class StudentDatabase extends BaseDatabase {
       created_at: newAnnotationDB.created_at,
       updated_at: newAnnotationDB.updated_at,
     });
+  };
+  public deleteAnnotationsByAnnotationId = async (
+    id: string
+  ): Promise<void> => {
+    await BaseDatabase.connection(StudentDatabase.TABLE_ANNOTATIONS)
+      .delete()
+      .where({ id });
+  };
+  public findAnnotationById = async (
+    id: string
+  ): Promise<AnnotationDB | undefined> => {
+    const [annotationDB]: AnnotationDB[] | undefined =
+      await BaseDatabase.connection(StudentDatabase.TABLE_ANNOTATIONS)
+        .select()
+        .where({ id });
+
+    return annotationDB;
   };
 }

@@ -52,3 +52,7 @@ studentRouter.put(
   "/annotation/:studentId",
   studentController.createAnnotationByStudentId
 );
+studentRouter.delete(
+  "/annotation/:id",
+  studentController.deleteAnnotationsByAnnotationId
+);

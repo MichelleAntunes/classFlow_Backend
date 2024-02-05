@@ -14,6 +14,7 @@ import { CreateNoteSchema } from "../dtos/student/createNewNote.dto";
 import { DeleteNoteSchema } from "../dtos/student/deleteNote.dto";
 import { EditNoteSchema } from "../dtos/student/editNote.dto";
 import { CreateAnnotationSchema } from "../dtos/student/createNewAnnotation.dto";
+import { DeleteAnnotationSchema } from "../dtos/student/deleteAnnotation.dto";
 
 export class StudentController {
   constructor(private studentBusiness: StudentBusiness) {}
@@ -199,26 +200,31 @@ export class StudentController {
       }
     }
   };
-  // public deleteNotesByNoteId = async (req: Request, res: Response) => {
-  //   try {
-  //     const input = DeleteNoteSchema.parse({
-  //       token: req.headers.authorization,
-  //       idToDelete: req.params.id,
-  //     });
-  //     const output = await this.studentBusiness.deleteNotesByNoteId(input);
-  //     res.status(200).send(output);
-  //   } catch (error) {
-  //     console.log(error);
+  public deleteAnnotationsByAnnotationId = async (
+    req: Request,
+    res: Response
+  ) => {
+    try {
+      const input = DeleteAnnotationSchema.parse({
+        token: req.headers.authorization,
+        idToDelete: req.params.id,
+      });
+      const output = await this.studentBusiness.deleteAnnotationsByAnnotationId(
+        input
+      );
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
 
-  //     if (error instanceof ZodError) {
-  //       res.status(400).send(error.issues);
-  //     } else if (error instanceof BaseError) {
-  //       res.status(error.statusCode).send(error.message);
-  //     } else {
-  //       res.status(500).send("Erro inesperado");
-  //     }
-  //   }
-  // };
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
   // public editNoteByNoteId = async (req: Request, res: Response) => {
   //   try {
   //     const input = EditNoteSchema.parse({

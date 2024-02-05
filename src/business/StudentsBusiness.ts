@@ -46,6 +46,10 @@ import {
   CreateAnnotationInputDTO,
   CreateAnnotationOutputDTO,
 } from "../dtos/student/createNewAnnotation.dto";
+import {
+  DeleteAnnotationInputDTO,
+  DeleteAnnotationOutputDTO,
+} from "../dtos/student/deleteAnnotation.dto";
 
 export class StudentBusiness {
   constructor(
@@ -414,6 +418,7 @@ export class StudentBusiness {
 
     return output;
   };
+  //Annotation
   public createAnnotationByStudentId = async (
     input: CreateAnnotationInputDTO
   ): Promise<CreateAnnotationOutputDTO> => {
@@ -453,6 +458,38 @@ export class StudentBusiness {
 
     const output: CreateAnnotationOutputDTO = {
       message: "Nova anotação adicionada com sucesso",
+    };
+
+    return output;
+  };
+  public deleteAnnotationsByAnnotationId = async (
+    input: DeleteAnnotationInputDTO
+  ): Promise<DeleteAnnotationOutputDTO> => {
+    const { token, idToDelete } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const annotationDB = await this.studentDatabase.findAnnotationById(
+      idToDelete
+    );
+    if (!annotationDB) {
+      throw new NotFoundError("Anotação com essa id não existe");
+    }
+
+    if (payload.role !== USER_ROLES.ADMIN) {
+      if (payload.id !== annotationDB.teacher_id) {
+        throw new ForbiddenError(
+          "Somente quem criou a anotação, pode deletá-la"
+        );
+      }
+    }
+    await this.studentDatabase.deleteAnnotationsByAnnotationId(idToDelete);
+
+    const output: DeleteStudentOutputDTO = {
+      message: "Nota deletada com sucesso",
     };
 
     return output;

@@ -230,15 +230,17 @@ export class Student {
   public getNotes(): Notes[] {
     return this.notes;
   }
-  public setAnnotations(value: Annotation[]): void {
-    this.annotations = value;
-  }
-  public getAnnotations(): Annotation[] {
-    return this.annotations;
-  }
   public setNotes(value: Notes[]): void {
     this.notes = value;
   }
+
+  public getAnnotations(): Annotation[] {
+    return this.annotations;
+  }
+  public setAnnotations(value: Annotation[]): void {
+    this.annotations = value;
+  }
+
   public getName(): string {
     return this.name;
   }

@@ -19,8 +19,8 @@ CREATE TABLE students (
   email TEXT UNIQUE NOT NULL,
   phone INTEGER,
   age INTEGER,  
-  notes TEXT DEFAULT 'Nenhuma nota',
-  annotations TEXT DEFAULT 'Nenhuma nota',
+  notes TEXT,
+  annotations TEXT ,
   photo BLOB DEFAULT '../../img/noImageFound.png',
   teacher_id TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
@@ -47,8 +47,8 @@ DROP TABLE notes;
 
 CREATE TABLE annotations (
   id TEXT PRIMARY KEY NOT NULL,
-  student_id TEXT UNIQUE NOT NULL,
-  teacher_id TEXT  UNIQUE NOT NULL,
+  student_id TEXT ,
+  teacher_id TEXT ,
   annotations TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
   updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
