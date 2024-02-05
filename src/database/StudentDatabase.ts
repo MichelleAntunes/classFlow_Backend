@@ -1,6 +1,7 @@
 import { BaseDatabase } from "./BaseDatabase";
 import { TeacherDataBase } from "./TeacherDatabase";
 import {
+  AnnotationDB,
   Notes,
   NotesDB,
   StudentDB,
@@ -11,7 +12,8 @@ export class StudentDatabase extends BaseDatabase {
   public static TABLE_STUDENT = "students";
   public static TABLE_TEACHER = "teachers";
   public static TABLE_NOTES = "notes";
-
+  public static TABLE_ANNOTATIONS = "annotations";
+  //Students
   public insertStudent = async (studentDB: StudentDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT).insert({
       id: studentDB.id,
@@ -44,7 +46,9 @@ export class StudentDatabase extends BaseDatabase {
         `${StudentDatabase.TABLE_STUDENT}.photo`,
         `${TeacherDataBase.TABLE_TEACHERS}.name as creator_name`,
         `${StudentDatabase.TABLE_NOTES}.id as notesId`,
-        `${StudentDatabase.TABLE_NOTES}.notes as notesText`
+        `${StudentDatabase.TABLE_NOTES}.notes as notesText`,
+        `${StudentDatabase.TABLE_ANNOTATIONS}.id as annotationsId`,
+        `${StudentDatabase.TABLE_ANNOTATIONS}.annotations as annotationsText`
       )
       .join(
         `${TeacherDataBase.TABLE_TEACHERS}`,
@@ -57,6 +61,12 @@ export class StudentDatabase extends BaseDatabase {
         `${StudentDatabase.TABLE_STUDENT}.id`,
         "=",
         `${StudentDatabase.TABLE_NOTES}.student_id`
+      )
+      .leftJoin(
+        `${StudentDatabase.TABLE_ANNOTATIONS}`,
+        `${StudentDatabase.TABLE_STUDENT}.id`,
+        "=",
+        `${StudentDatabase.TABLE_ANNOTATIONS}.student_id`
       );
 
     const groupedResult = result.reduce(
@@ -86,6 +96,14 @@ export class StudentDatabase extends BaseDatabase {
             notes: row.notesId
               ? [{ notesId: row.notesId, notesText: row.notesText }]
               : [],
+            annotations: row.annotationsId
+              ? [
+                  {
+                    annotationsId: row.notesId,
+                    annotationsText: row.annotationsText,
+                  },
+                ]
+              : [],
           });
         }
 
@@ -96,7 +114,6 @@ export class StudentDatabase extends BaseDatabase {
 
     return groupedResult;
   };
-
   public async findStudentById(id: string): Promise<StudentDB | undefined> {
     const [studentDB]: StudentDB[] | undefined = await BaseDatabase.connection(
       StudentDatabase.TABLE_STUDENT
@@ -106,22 +123,20 @@ export class StudentDatabase extends BaseDatabase {
 
     return studentDB;
   }
-
   public updateStudent = async (studentDB: StudentDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
       .update(studentDB)
       .where({ id: studentDB.id });
   };
-
   public deleteStudentById = async (id: string): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
       .delete()
       .where({ id });
   };
-
+  //Notes
   public insertNotesByStudentId = async (newNoteDB: NotesDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_NOTES).insert({
-      id: newNoteDB.note_id,
+      id: newNoteDB.id,
       student_id: newNoteDB.student_id,
       teacher_id: newNoteDB.teacher_id,
       notes: newNoteDB.notes,
@@ -129,13 +144,11 @@ export class StudentDatabase extends BaseDatabase {
       updated_at: newNoteDB.updated_at,
     });
   };
-
   public deleteNotesByNoteId = async (id: string): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_NOTES)
       .delete()
       .where({ id });
   };
-
   public findNoteById = async (id: string): Promise<NotesDB | undefined> => {
     const [noteDB]: NotesDB[] | undefined = await BaseDatabase.connection(
       StudentDatabase.TABLE_NOTES
@@ -145,10 +158,28 @@ export class StudentDatabase extends BaseDatabase {
 
     return noteDB;
   };
-
   public updateNote = async (noteDB: NotesDB) => {
+    if (!noteDB.id) {
+      throw new Error(
+        "A propriedade 'note_id' é necessária para atualizar a nota."
+      );
+    }
+
     await BaseDatabase.connection(StudentDatabase.TABLE_NOTES)
       .update(noteDB)
-      .where({ id: noteDB.note_id });
+      .where({ id: noteDB.id });
+  };
+  //Annotations
+  public insertAnnotationsByStudentId = async (
+    newAnnotationDB: AnnotationDB
+  ): Promise<void> => {
+    await BaseDatabase.connection(StudentDatabase.TABLE_ANNOTATIONS).insert({
+      id: newAnnotationDB.id,
+      student_id: newAnnotationDB.student_id,
+      teacher_id: newAnnotationDB.teacher_id,
+      annotations: newAnnotationDB.annotations,
+      created_at: newAnnotationDB.created_at,
+      updated_at: newAnnotationDB.updated_at,
+    });
   };
 }
