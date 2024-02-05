@@ -18,6 +18,10 @@ export interface StudentsWithCreatorName {
     notesId: string;
     notesText: string;
   }>;
+  annotations: Array<{
+    annotationsId: string;
+    annotationsText: string;
+  }>;
   photo?: ImageData | string | null | undefined;
   teacher_id: string;
   created_at: string;
@@ -36,13 +40,16 @@ export interface StudentDB {
     notesId: string;
     notesText: string;
   }>;
+  annotations: Array<{
+    annotationsId: string;
+    annotationsText: string;
+  }>;
   photo: ImageData | string | null;
   teacher_id: string;
   created_at: string;
   role: USER_ROLES;
   updated_at: string;
 }
-
 export interface StudentModel {
   id: string;
   name: string;
@@ -53,6 +60,10 @@ export interface StudentModel {
     id: string;
     notes: string;
   }>;
+  annotations: Array<{
+    annotationsId: string;
+    annotationsText: string;
+  }>;
   photo: ImageData | string | null;
   teacherId: {
     id: string;
@@ -62,7 +73,71 @@ export interface StudentModel {
   createdAt: string;
   role: USER_ROLES;
 }
+export interface AnnotationDB {
+  id: string;
+  student_id: string;
+  annotations: string;
+  created_at: string;
+  updated_at: string;
+  teacher_id: string;
+}
+export class Annotation {
+  constructor(
+    private id: string,
+    private studentId: string,
+    private annotationText: string,
+    private createdAt: string,
+    private updatedAt: string,
+    private teacherId: string
+  ) {}
 
+  public getAnnotationId(): string {
+    return this.id;
+  }
+  public setAnnotationId(value: string): void {
+    this.id = value;
+  }
+  public getStudentId(): string {
+    return this.studentId;
+  }
+  public setStudentId(value: string): void {
+    this.studentId = value;
+  }
+  public getAnnotation(): string {
+    return this.annotationText;
+  }
+  public setAnnotationText(value: string): void {
+    this.annotationText = value;
+  }
+  public getCreatedAt(): string {
+    return this.createdAt;
+  }
+  public setCreatedAt(value: string): void {
+    this.createdAt = value;
+  }
+  public getUpdatedAt(): string {
+    return this.updatedAt;
+  }
+  public setUpdatedAt(value: string): void {
+    this.updatedAt = value;
+  }
+  public getTeacherId(): string {
+    return this.teacherId;
+  }
+  public setTeacherId(value: string): void {
+    this.teacherId = value;
+  }
+  public toDBModel(): AnnotationDB {
+    return {
+      id: this.id,
+      student_id: this.studentId,
+      teacher_id: this.teacherId,
+      created_at: this.createdAt,
+      annotations: this.annotationText,
+      updated_at: this.updatedAt,
+    };
+  }
+}
 export interface NotesDB {
   id: string;
   student_id: string;
@@ -138,6 +213,7 @@ export class Student {
     private phone: string | null,
     private age: number | null,
     private notes: Notes[],
+    private annotations: Annotation[],
     private teacherId: string,
     private teacherName: string,
     private createdAt: string,
@@ -153,6 +229,12 @@ export class Student {
   }
   public getNotes(): Notes[] {
     return this.notes;
+  }
+  public setAnnotations(value: Annotation[]): void {
+    this.annotations = value;
+  }
+  public getAnnotations(): Annotation[] {
+    return this.annotations;
   }
   public setNotes(value: Notes[]): void {
     this.notes = value;
@@ -239,6 +321,10 @@ export class Student {
         notesId: note.getNoteId(),
         notesText: note.getNotes(),
       })),
+      annotations: this.annotations.map((annotation) => ({
+        annotationsId: annotation.getAnnotationId(),
+        annotationsText: annotation.getAnnotation(),
+      })),
       photo: this.photo,
       teacher_id: this.teacherId,
       created_at: this.createdAt,
@@ -257,6 +343,10 @@ export class Student {
       notes: this.notes.map((note) => ({
         id: note.getNoteId(),
         notes: note.getNotes(),
+      })),
+      annotations: this.annotations.map((annotation) => ({
+        annotationsId: annotation.getAnnotationId(),
+        annotationsText: annotation.getAnnotation(),
       })),
       photo: this.photo,
       teacherId: {

@@ -20,6 +20,7 @@ CREATE TABLE students (
   phone INTEGER,
   age INTEGER,  
   notes TEXT DEFAULT 'Nenhuma nota',
+  annotations TEXT DEFAULT 'Nenhuma nota',
   photo BLOB DEFAULT '../../img/noImageFound.png',
   teacher_id TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
@@ -33,7 +34,7 @@ CREATE TABLE notes (
   id TEXT PRIMARY KEY,
   student_id TEXT,
   teacher_id TEXT,
-  notes TEXT,
+  notes TEXT,  
   created_at DATETIME,
   updated_at DATETIME,
   UNIQUE (teacher_id, student_id, id),
@@ -48,12 +49,13 @@ CREATE TABLE annotations (
   id TEXT PRIMARY KEY NOT NULL,
   student_id TEXT UNIQUE NOT NULL,
   teacher_id TEXT  UNIQUE NOT NULL,
-  annotation TEXT NOT NULL,
+  annotations TEXT NOT NULL,
   created_at TEXT DEFAULT (DATETIME()) NOT NULL,
   updated_at TEXT DEFAULT (DATETIME()) NOT NULL,
   FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+DROP TABLE annotations;
 -- Table teacher_student_relationship: Establishes a many-to-many relationship between teachers and students, allowing a teacher to have multiple students and a student to have multiple teachers.
 CREATE TABLE teacher_student_relationship (
   teacher_id TEXT NOT NULL,
