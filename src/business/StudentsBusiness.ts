@@ -258,9 +258,12 @@ export class StudentBusiness {
     if (!studentDB) {
       throw new NotFoundError("Estudante com essa id não existe");
     }
-
-    if (payload.id !== studentDB.teacher_id) {
-      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+    if (payload.role !== USER_ROLES.ADMIN) {
+      if (payload.id !== studentDB.teacher_id) {
+        throw new ForbiddenError(
+          "Somente quem criou o estudante, pode editá-lo"
+        );
+      }
     }
 
     const student = new Student(
@@ -352,7 +355,7 @@ export class StudentBusiness {
       }
     }
     const newNote = new Notes(
-      noteDB.note_id,
+      noteDB.id,
       noteDB.student_id,
       noteDB.notes,
       noteDB.created_at,

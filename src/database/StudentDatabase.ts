@@ -121,7 +121,7 @@ export class StudentDatabase extends BaseDatabase {
 
   public insertNotesByStudentId = async (newNoteDB: NotesDB): Promise<void> => {
     await BaseDatabase.connection(StudentDatabase.TABLE_NOTES).insert({
-      id: newNoteDB.note_id,
+      id: newNoteDB.id,
       student_id: newNoteDB.student_id,
       teacher_id: newNoteDB.teacher_id,
       notes: newNoteDB.notes,
@@ -146,9 +146,20 @@ export class StudentDatabase extends BaseDatabase {
     return noteDB;
   };
 
+  // public updateNote = async (noteDB: NotesDB) => {
+  //   await BaseDatabase.connection(StudentDatabase.TABLE_NOTES)
+  //     .update(noteDB)
+  //     .where({ id: noteDB.note_id });
+  // };
   public updateNote = async (noteDB: NotesDB) => {
+    if (!noteDB.id) {
+      throw new Error(
+        "A propriedade 'note_id' é necessária para atualizar a nota."
+      );
+    }
+
     await BaseDatabase.connection(StudentDatabase.TABLE_NOTES)
       .update(noteDB)
-      .where({ id: noteDB.note_id });
+      .where({ id: noteDB.id });
   };
 }
