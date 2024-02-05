@@ -33,19 +33,27 @@ import { emit } from "process";
 import {
   CreateNoteInputDTO,
   CreateNoteOutputDTO,
-} from "../dtos/student/createNewNote.dto";
+} from "../dtos/notes/addNewNote.dto";
 import {
   EditNoteInputDTO,
   EditNoteOutputDTO,
-} from "../dtos/student/editNote.dto";
+} from "../dtos/notes/editNote.dto";
 import {
   DeleteNoteInputDTO,
   DeleteNoteOutputDTO,
-} from "../dtos/student/deleteNote.dto";
+} from "../dtos/notes/deleteNote.dto";
 import {
   CreateAnnotationInputDTO,
   CreateAnnotationOutputDTO,
-} from "../dtos/student/createNewAnnotation.dto";
+} from "../dtos/annotation/createNewAnnotation.dto";
+import {
+  DeleteAnnotationInputDTO,
+  DeleteAnnotationOutputDTO,
+} from "../dtos/annotation/deleteAnnotation.dto";
+import {
+  EditAnnotationInputDTO,
+  EditAnnotationOutputDTO,
+} from "../dtos/annotation/editAnnotation.dto";
 
 export class StudentBusiness {
   constructor(
@@ -414,6 +422,7 @@ export class StudentBusiness {
 
     return output;
   };
+  //Annotation
   public createAnnotationByStudentId = async (
     input: CreateAnnotationInputDTO
   ): Promise<CreateAnnotationOutputDTO> => {
@@ -453,6 +462,82 @@ export class StudentBusiness {
 
     const output: CreateAnnotationOutputDTO = {
       message: "Nova anotação adicionada com sucesso",
+    };
+
+    return output;
+  };
+  public deleteAnnotationsByAnnotationId = async (
+    input: DeleteAnnotationInputDTO
+  ): Promise<DeleteAnnotationOutputDTO> => {
+    const { token, idToDelete } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+    const annotationDB = await this.studentDatabase.findAnnotationById(
+      idToDelete
+    );
+    if (!annotationDB) {
+      throw new NotFoundError("Anotação com essa id não existe");
+    }
+
+    if (payload.role !== USER_ROLES.ADMIN) {
+      if (payload.id !== annotationDB.teacher_id) {
+        throw new ForbiddenError(
+          "Somente quem criou a anotação, pode deletá-la"
+        );
+      }
+    }
+    await this.studentDatabase.deleteAnnotationsByAnnotationId(idToDelete);
+
+    const output: DeleteStudentOutputDTO = {
+      message: "Nota deletada com sucesso",
+    };
+
+    return output;
+  };
+  public editAnnotationByAnnotationId = async (
+    input: EditAnnotationInputDTO
+  ): Promise<EditAnnotationOutputDTO> => {
+    const { token, idToEdit, annotation } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const annotationDB = await this.studentDatabase.findAnnotationById(
+      idToEdit
+    );
+
+    if (!annotationDB) {
+      throw new NotFoundError("Anotação com essa id não existe");
+    }
+
+    if (payload.role !== USER_ROLES.ADMIN) {
+      if (payload.id !== annotationDB.teacher_id) {
+        throw new ForbiddenError("Somente quem criou o nota, pode editá-la");
+      }
+    }
+    const newAnnotation = new Annotation(
+      annotationDB.id,
+      annotationDB.student_id,
+      annotationDB.annotations,
+      annotationDB.created_at,
+      annotationDB.updated_at,
+      annotationDB.teacher_id
+    );
+    newAnnotation.setAnnotationText(annotation);
+
+    const updatedAnnotationDB = newAnnotation.toDBModel();
+
+    await this.studentDatabase.updateAnnotation(updatedAnnotationDB);
+
+    const output: EditAnnotationOutputDTO = {
+      message: "Anotação editada com sucesso",
     };
 
     return output;
