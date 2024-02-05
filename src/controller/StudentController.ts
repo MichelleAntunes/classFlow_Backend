@@ -10,11 +10,12 @@ import { GetStudentSchema } from "../dtos/student/getStudents.dto";
 import { EditStudentSchema } from "../dtos/student/editStudent.dto";
 import { DeleteStudentSchema } from "../dtos/student/deleteStudent.dto";
 import { IdGenerator } from "../services/IdGenerator";
-import { CreateNoteSchema } from "../dtos/student/createNewNote.dto";
-import { DeleteNoteSchema } from "../dtos/student/deleteNote.dto";
-import { EditNoteSchema } from "../dtos/student/editNote.dto";
-import { CreateAnnotationSchema } from "../dtos/student/createNewAnnotation.dto";
-import { DeleteAnnotationSchema } from "../dtos/student/deleteAnnotation.dto";
+import { CreateNoteSchema } from "../dtos/notes/addNewNote.dto";
+import { DeleteNoteSchema } from "../dtos/notes/deleteNote.dto";
+import { EditNoteSchema } from "../dtos/notes/editNote.dto";
+import { CreateAnnotationSchema } from "../dtos/annotation/createNewAnnotation.dto";
+import { DeleteAnnotationSchema } from "../dtos/annotation/deleteAnnotation.dto";
+import { EditAnnotationSchema } from "../dtos/annotation/editAnnotation.dto";
 
 export class StudentController {
   constructor(private studentBusiness: StudentBusiness) {}
@@ -225,25 +226,27 @@ export class StudentController {
       }
     }
   };
-  // public editNoteByNoteId = async (req: Request, res: Response) => {
-  //   try {
-  //     const input = EditNoteSchema.parse({
-  //       token: req.headers.authorization,
-  //       idToEdit: req.params.noteid,
-  //       note: req.body.note,
-  //     });
-  //     const output = await this.studentBusiness.editNoteByNoteId(input);
-  //     res.status(200).send(output);
-  //   } catch (error) {
-  //     console.log(error);
+  public editAnnotationByAnnotationId = async (req: Request, res: Response) => {
+    try {
+      const input = EditAnnotationSchema.parse({
+        token: req.headers.authorization,
+        idToEdit: req.params.annotationId,
+        annotation: req.body.annotation,
+      });
+      const output = await this.studentBusiness.editAnnotationByAnnotationId(
+        input
+      );
+      res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
 
-  //     if (error instanceof ZodError) {
-  //       res.status(400).send(error.issues);
-  //     } else if (error instanceof BaseError) {
-  //       res.status(error.statusCode).send(error.message);
-  //     } else {
-  //       res.status(500).send("Erro inesperado");
-  //     }
-  //   }
-  // };
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
 }

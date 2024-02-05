@@ -165,4 +165,15 @@ export class StudentDatabase extends BaseDatabase {
 
     return annotationDB;
   };
+  public updateAnnotation = async (annotationDB: AnnotationDB) => {
+    if (!annotationDB.id) {
+      throw new Error(
+        "A propriedade 'note_id' é necessária para atualizar a nota."
+      );
+    }
+
+    await BaseDatabase.connection(StudentDatabase.TABLE_ANNOTATIONS)
+      .update(annotationDB)
+      .where({ id: annotationDB.id });
+  };
 }
