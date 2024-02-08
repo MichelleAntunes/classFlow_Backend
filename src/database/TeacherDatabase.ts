@@ -21,4 +21,12 @@ export class TeacherDataBase extends BaseDatabase {
 
     return userDB;
   };
+  public updatePasswordByEmail = async (
+    email: string,
+    newPassword: string
+  ): Promise<void> => {
+    await BaseDatabase.connection(TeacherDataBase.TABLE_TEACHERS)
+      .where({ email })
+      .update({ password: newPassword });
+  };
 }

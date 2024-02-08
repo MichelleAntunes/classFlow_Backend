@@ -46,4 +46,17 @@ studentRouter.delete("/:id", studentController.deleteStudent);
 //Notes
 studentRouter.put("/note/:studentId", studentController.createNotesByStudentId);
 studentRouter.delete("/note/:id", studentController.deleteNotesByNoteId);
-studentRouter.put("/noteee/:noteid", studentController.editNoteByNoteId);
+studentRouter.put("/noteEdit/:noteid", studentController.editNoteByNoteId);
+//Anotations
+studentRouter.put(
+  "/annotation/:studentId",
+  studentController.createAnnotationByStudentId
+);
+studentRouter.delete(
+  "/annotation/:id",
+  studentController.deleteAnnotationsByAnnotationId
+);
+studentRouter.put(
+  "/annotationEdit/:annotationId",
+  studentController.editAnnotationByAnnotationId
+);

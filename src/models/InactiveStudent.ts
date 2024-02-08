@@ -8,7 +8,7 @@ export interface ImageData {
   mimeType?: "image/png" | "image/jpeg";
 }
 
-export interface StudentsWithCreatorName {
+export interface InactiveStudentsWithCreatorName {
   id: string;
   name: string;
   email: string;
@@ -30,7 +30,7 @@ export interface StudentsWithCreatorName {
   creator_name: string;
 }
 
-export interface StudentDB {
+export interface InactiveStudentDB {
   id: string;
   name: string;
   email: string;
@@ -50,7 +50,7 @@ export interface StudentDB {
   role: USER_ROLES;
   updated_at: string;
 }
-export interface StudentModel {
+export interface InactiveStudentModel {
   id: string;
   name: string;
   email: string;
@@ -205,7 +205,7 @@ export class Notes {
   }
 }
 
-export class Student {
+export class InactiveStudent {
   constructor(
     private id: string,
     private name: string,
@@ -312,7 +312,7 @@ export class Student {
   public setUpdateAt(value: string): void {
     this.updatedAt = value;
   }
-  public toDBModel(): StudentDB {
+  public toDBModel(): InactiveStudentDB {
     return {
       id: this.id,
       name: this.name,
@@ -335,7 +335,7 @@ export class Student {
     };
   }
 
-  public toBusinessModel(): StudentModel {
+  public toBusinessModel(): InactiveStudentModel {
     return {
       id: this.id,
       name: this.name,

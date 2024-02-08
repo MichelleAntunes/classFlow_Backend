@@ -1,7 +1,9 @@
 import { TeacherDataBase } from "../database/TeacherDatabase";
 import { LoginInputDTO, LoginOutputDTO } from "../dtos/teacher/login.dto";
+import { ResetPasswordInputDTO } from "../dtos/teacher/resetPassword.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../dtos/teacher/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
+import { BaseError } from "../errors/BaseError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { USER_ROLES } from "../models/Student";
 import { Teacher, TokenPayload } from "../models/Teacher";
@@ -81,5 +83,22 @@ export class TeacherBusiness {
     const output: LoginOutputDTO = { token };
 
     return output;
+  };
+  public resetPassword = async (
+    input: ResetPasswordInputDTO
+  ): Promise<void> => {
+    const { email, newPassword, confirmPassword } = input;
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestError("As senhas não coincidem");
+    }
+
+    const teacher = await this.teacherDatabase.findeTeacherByEmail(email);
+    if (!teacher) {
+      throw new BadRequestError("Professor não encontrado");
+    }
+
+    const hashedPassword = await this.hashManager.hash(newPassword);
+    await this.teacherDatabase.updatePasswordByEmail(email, hashedPassword);
   };
 }
