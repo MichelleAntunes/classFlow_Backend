@@ -4,6 +4,7 @@ import { BaseError } from "../errors/BaseError";
 import { Request, Response } from "express";
 import { SignupSchema } from "../dtos/teacher/signup.dto";
 import { LoginSchema } from "../dtos/teacher/login.dto";
+import { ResetPasswordSchema } from "../dtos/teacher/resetPassword.dto";
 
 export class TeacherController {
   constructor(private teacherBusiness: TeacherBusiness) {}
@@ -41,6 +42,28 @@ export class TeacherController {
       const output = await this.teacherBusiness.login(input);
 
       res.status(200).send(output);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
+  public resetPassword = async (req: Request, res: Response) => {
+    try {
+      const input = ResetPasswordSchema.parse({
+        email: req.body.email,
+        newPassword: req.body.newPassword,
+        confirmPassword: req.body.confirmPassword,
+      });
+
+      await this.teacherBusiness.resetPassword(input);
+      res.status(200).send("Senha redefinida com sucesso");
     } catch (error) {
       console.log(error);
 

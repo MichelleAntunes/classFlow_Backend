@@ -33,10 +33,9 @@ export class StudentController {
       });
 
       const output = await this.studentBusiness.createStudent(input);
-      console.log("Created student successfully:", output);
+
       res.status(201).send(output);
     } catch (error) {
-      console.log("Error in createStudent:", error);
       console.log(error);
 
       if (error instanceof ZodError) {

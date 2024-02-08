@@ -13,6 +13,7 @@ export class StudentDatabase extends BaseDatabase {
   public static TABLE_TEACHER = "teachers";
   public static TABLE_NOTES = "notes";
   public static TABLE_ANNOTATIONS = "annotations";
+  public static TABLE_INACTIVE_STUDENT = "inactive_students";
 
   //Students
   public insertStudent = async (studentDB: StudentDB): Promise<void> => {
@@ -176,4 +177,35 @@ export class StudentDatabase extends BaseDatabase {
       .update(annotationDB)
       .where({ id: annotationDB.id });
   };
+  public async moveStudentToInactive(studentId: string): Promise<void> {
+    // Passo 1: Excluir o aluno da tabela de alunos
+    await BaseDatabase.connection(StudentDatabase.TABLE_STUDENT)
+      .delete()
+      .where({ id: studentId });
+
+    // Passo 2: Obter os dados do aluno excluído
+    const deletedStudent: StudentDB | undefined = await this.findStudentById(
+      studentId
+    );
+    // Verificar se o aluno existe antes de tentar movê-lo para inativos
+    if (deletedStudent) {
+      // Inserir os dados do aluno na tabela de alunos inativos
+      await BaseDatabase.connection(
+        StudentDatabase.TABLE_INACTIVE_STUDENT
+      ).insert({
+        id: deletedStudent.id,
+        name: deletedStudent.name,
+        email: deletedStudent.email,
+        phone: deletedStudent.phone,
+        age: deletedStudent.age,
+        notes: deletedStudent.notes,
+        annotations: deletedStudent.annotations,
+        photo: deletedStudent.photo,
+        teacher_id: deletedStudent.teacher_id,
+        created_at: deletedStudent.created_at,
+        role: deletedStudent.role,
+        inactive_at: new Date().toISOString(), // Adiciona a data e hora atual como o momento em que o aluno foi movido para inativo
+      });
+    }
+  }
 }
