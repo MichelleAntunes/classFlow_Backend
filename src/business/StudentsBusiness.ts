@@ -54,6 +54,10 @@ import {
   EditAnnotationInputDTO,
   EditAnnotationOutputDTO,
 } from "../dtos/annotation/editAnnotation.dto";
+import {
+  GetInactiveStudentInputDTO,
+  GetInactiveStudentOutputDTO,
+} from "../dtos/inactiveStudent/getInactiveStudent.dto";
 
 export class StudentBusiness {
   constructor(
