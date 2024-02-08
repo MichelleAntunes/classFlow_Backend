@@ -29,6 +29,6 @@ We will develop an online platform to assist independent teachers in organizing 
 
 ### Diagram
 
-![Diagram ClassFlow Back-End](./img/diagram.png)
+![Diagram ClassFlow Back-End](./src/img/diagram.png)
 
 ### Status: In development
