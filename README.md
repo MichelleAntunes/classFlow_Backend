@@ -57,10 +57,10 @@ $ npm run test
 
 ## Technologies used
 
-//### Front-End:
+<!-- //### Front-End:
 
 //- JavaScript, React, useEffect, useState, React Router, Custom Hooks, Context
-//- Style: Tailwind CSS
+//- Style: Tailwind CSS -->
 
 ### Back-End:
 
@@ -72,7 +72,7 @@ $ npm run test
 6. [OOP](https://pt.wikipedia.org/wiki/Programa%C3%A7%C3%A3o_orientada_a_objetos)
 7. [Layered Architecture](https://pt.wikipedia.org/wiki/Arquitetura_multicamada)
 8. [UUID generation](https://pt.wikipedia.org/wiki/Identificador_%C3%BAnico_universal)
-9. hash generation](https://pt.wikipedia.org/wiki/Fun%C3%A7%C3%A3o_hash_criptogr%C3%A1fica)
+9. [Hash generation](https://pt.wikipedia.org/wiki/Fun%C3%A7%C3%A3o_hash_criptogr%C3%A1fica)
 10. [Authentication and authorization](https://pt.wikipedia.org/wiki/Autoriza%C3%A7%C3%A3o)
 11. [Routing](https://acervolima.com/roteamento-em-node-js/)
 12. [Postman](https://www.postman.com/)
@@ -93,20 +93,20 @@ Currently (Feb/2024): TeacherBusiness Automated Tests 100%
 
 - A calendar allows teachers to view and manage the class hours occupied and available in different periods (daily, monthly, yearly).
 
-2 - \*\*Communication between students and teachers
+2 - **Communication between students and teachers:**
 
 - Students receive an access link when they register, which allows them to view their attendance history, grades and use a chat feature to interact with the teacher.
 
-3 - Automated testing
+3 - **Automated testing**
 
--Perform tests on the entire Business layer, including teachers, students and inactive students.
+- Perform tests on the entire Business layer, including teachers, students and inactive students.
 
 ## Technologies used
 
-//### Front-End:
+<!-- //### Front-End:
 
 //- JavaScript, React, useEffect, useState, React Router, Custom Hooks, Context
-//- Style: Tailwind CSS
+//- Style: Tailwind CSS -->
 
 ### Back-End:
 
@@ -114,7 +114,7 @@ Currently (Feb/2024): TeacherBusiness Automated Tests 100%
 
 ### Diagram
 
-![ClassFlow Back-End Diagram](./img/diagram.png)
+![ClassFlow Back-End Diagram](./src/img/diagram.png)
 
 ## Project status
 
