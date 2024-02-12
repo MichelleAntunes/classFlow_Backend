@@ -1,36 +1,36 @@
-## Projeto ClassFlow
+## ClassFlow Project
 
-### Plataforma Online para Professores Independentes
+### Online Platform for Independent Teachers
 
-## Índice:
+## Table of Contents::
 
-- <a href="#Objetivo"> Objetivo </a>
-- <a href="#Documentação da API"> Documentação da API </a>
-- <a href="#Estruturação do banco de dados"> Estruturação do banco de dados </a>
-  <a href="#Como rodar este projeto?"> Como rodar este projeto? </a>
-- <a href="#Técnologias utilizadas"> Técnologias utilizadas </a>
-- <a href="#Testes"> Testes </a>
-- <a href="#Autoria"> Autoria </a>
-- <a href="#Próximos Passos"> Próximos Passos </a>
+- <a href="#Objective"> Objective  </a>
+- <a href="#API Documentation"> API Documentation </a>
+- <a href="#Database Structuring "> Database Structuring </a>
+  <a href="#How to Run This Project?"> How to Run This Project? </a>
+- <a href="#Technologies Used"> Technologies Used </a>
+- <a href="#Testing"> Testing  </a>
+- <a href="#Authorship"> Authorship  </a>
+- <a href="# Next Steps">  Next Steps </a>
 
-## Objetivo
+## Objective 
 
-Irei desenvolver uma plataforma online para ajudar os professores independentes a organizar suas aulas diárias com informação específicas de cada aluno. As principais funcionalidades incluem:
+I will develop an online platform to help independent teachers organize their daily classes with specific information for each student. The main functionalities include:
 
-**Gestão de alunos:**
+**Student Management:**
 
-- Os professores podem registar novo aluno, editar e apagar alunos, mover alunos da lista de "ativos" para a lista de "inativos", caso necessário, mantendo notas e anotações personalizadas para cada um.
+- Teachers can register new students, edit and delete students, move students from the "active" list to the "inactive" list, if necessary, while maintaining personalized grades and notes for each one.
 
-## Documentação da API
+## API Documentation
 
-[Link Documentação](https://documenter.getpostman.com/view/25825355/2sA2r3amFv)
+[API Documentation Link](https://documenter.getpostman.com/view/25825355/2sA2r3amFv)
 
-Link Front-End Repositório (Em desenvolvimento)
-Front-End Deploy link (Under development)
+Front-End Repository Link (Under Development)
+Front-End Deploy Link (Under Development)
 
-### Structuring the database
+### Database Structuring
 
-ClassFlow Back-End Diagram](./img/diagram.png)
+[ClassFlow Back-End Diagram](./img/diagram.png)
 
 ## How to run this project?
 
