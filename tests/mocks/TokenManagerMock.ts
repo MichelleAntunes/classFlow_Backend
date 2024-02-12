@@ -5,7 +5,7 @@ export class TokenManagerMock {
     if (payload.id === "id-mock") {
       // signup
       return "token-mock";
-    } else if (payload.id === "id-mock-professor") {
+    } else if (payload.id === "id-mock1") {
       // login Professor Mock
       return "token-mock-professor";
     } else {

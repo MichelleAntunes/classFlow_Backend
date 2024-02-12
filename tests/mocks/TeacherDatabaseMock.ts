@@ -22,7 +22,7 @@ const teachersMock: TeacherDB[] = [
   },
 ];
 
-export class TeacherDataBaseMock extends BaseDatabase {
+export class TeacherDatabaseMock extends BaseDatabase {
   public insertTeacher = async (teacherDB: TeacherDB): Promise<void> => {};
 
   public findeTeacherByEmail = async (

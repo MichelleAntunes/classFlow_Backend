@@ -8,7 +8,7 @@ export class HashManagerMock {
     hash: string
   ): Promise<boolean> => {
     switch (plaintext) {
-      case "Mock123":
+      case "Mock-123":
         return hash === "hash-mock";
 
       case "MockAdm-123":
