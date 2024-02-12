@@ -126,7 +126,3 @@ Michelle Antunes, maio/2023.
 Linkedin: www.linkedin.com/in/michelle-antunes-868b24156
 <br>
 Email: miichelleantunes@outlook.com
-
-**_ Translated with www.DeepL.com/Translator (free version) _**
-
-Translated with DeepL.com (free version)
