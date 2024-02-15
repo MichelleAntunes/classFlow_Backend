@@ -4,8 +4,8 @@ import { BaseDatabase } from "../../src/database/BaseDatabase";
 const teachersMock: TeacherDB[] = [
   {
     id: "id-mock1",
-    name: "Professor Mock",
-    email: "professor@mock.com",
+    name: "Teacher Mock",
+    email: "teacher@mock.com",
     password: "hash-mock", //password: Mock-123
     created_at: new Date().toISOString(),
     photo: "",
@@ -13,8 +13,8 @@ const teachersMock: TeacherDB[] = [
   },
   {
     id: "id-mock2",
-    name: "Professor Mock ADMIN",
-    email: "professor2@mock.com",
+    name: "Teacher Mock ADMIN",
+    email: "teacher2@mock.com",
     password: "hash-mock-adm", //password: MockAdm-123
     created_at: new Date().toISOString(),
     photo: "",
@@ -25,7 +25,7 @@ const teachersMock: TeacherDB[] = [
 export class TeacherDatabaseMock extends BaseDatabase {
   public insertTeacher = async (teacherDB: TeacherDB): Promise<void> => {};
 
-  public findeTeacherByEmail = async (
+  public findTeacherByEmail = async (
     email: string
   ): Promise<TeacherDB | undefined> => {
     return teachersMock.filter((teacher) => teacher.email === email)[0];
@@ -40,7 +40,7 @@ export class TeacherDatabaseMock extends BaseDatabase {
     if (teacherIndex !== -1) {
       teachersMock[teacherIndex].password = newPassword;
     } else {
-      throw new Error("Professor não encontrado");
+      throw new Error("Teacher not found");
     }
   };
 }

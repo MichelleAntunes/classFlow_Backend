@@ -11,7 +11,7 @@ export class TeacherDataBase extends BaseDatabase {
     );
   };
 
-  public findeTeacherByEmail = async (
+  public findTeacherByEmail = async (
     email: string
   ): Promise<TeacherDB | undefined> => {
     const [userDB]: Array<TeacherDB | undefined> =

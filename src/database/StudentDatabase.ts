@@ -30,7 +30,6 @@ export class StudentDatabase extends BaseDatabase {
       updated_at: studentDB.updated_at,
     });
   };
-
   public getStudentsWithCreatorName = async (): Promise<
     StudentsWithCreatorName[]
   > => {
