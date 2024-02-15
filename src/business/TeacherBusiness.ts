@@ -21,6 +21,13 @@ export class TeacherBusiness {
 
   public signup = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
     const { name, email, password } = input;
+
+    const isEmailRegistered = await this.teacherDatabase.findTeacherByEmail(
+      email
+    );
+    if (isEmailRegistered) {
+      throw new BaseError(400, "E-mail already exists");
+    }
     const id = this.idGenerator.generate();
 
     const hashedPassword = await this.hashManager.hash(password);
@@ -49,10 +56,10 @@ export class TeacherBusiness {
   public login = async (input: LoginInputDTO): Promise<LoginOutputDTO> => {
     const { email, password } = input;
 
-    const teacherDB = await this.teacherDatabase.findeTeacherByEmail(email);
+    const teacherDB = await this.teacherDatabase.findTeacherByEmail(email);
 
     if (!teacherDB) {
-      throw new BadRequestError("E-mail e/ou senha inválidos");
+      throw new BaseError(400, "Invalid e-mail and/or password");
     }
 
     const teacher = new Teacher(
@@ -71,7 +78,7 @@ export class TeacherBusiness {
     );
 
     if (!isPasswordCorrect) {
-      throw new BadRequestError("E-mail e/ou senha inválidos");
+      throw new BaseError(400, "Invalid e-mail and/or password");
     }
 
     const payload: TokenPayload = {
@@ -90,12 +97,12 @@ export class TeacherBusiness {
     const { email, newPassword, confirmPassword } = input;
 
     if (newPassword !== confirmPassword) {
-      throw new BadRequestError("As senhas não coincidem");
+      throw new BaseError(400, "The passwords don't match");
     }
 
-    const teacher = await this.teacherDatabase.findeTeacherByEmail(email);
+    const teacher = await this.teacherDatabase.findTeacherByEmail(email);
     if (!teacher) {
-      throw new BadRequestError("Professor não encontrado");
+      throw new BaseError(400, "Teacher not found");
     }
 
     const hashedPassword = await this.hashManager.hash(newPassword);

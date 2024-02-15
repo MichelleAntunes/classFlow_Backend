@@ -110,14 +110,17 @@ export class InactiveStudentBusiness {
     const student = await this.studentDatabase.findStudentById(studentId);
     // Not found error if student doesn't exist
     if (!student) {
-      throw new NotFoundError("Estudante não encontrado");
+      throw new NotFoundError("Student not found");
     }
     // Check if student is already inactive
     const inactiveStudent =
       await this.inactiveStudentDatabase.findInactiveStudentById(studentId);
 
     if (inactiveStudent) {
-      throw new BadRequestError("O aluno já está na lista de alunos inativos");
+      throw new BaseError(
+        400,
+        "The student is already on the list of inactive students"
+      );
     }
     // Insert student into inactive list
     await this.inactiveStudentDatabase.insertInactiveStudent({
@@ -128,7 +131,7 @@ export class InactiveStudentBusiness {
     // Delete student from active list
     await this.studentDatabase.deleteStudentById(studentId);
 
-    return { message: "Estudante movido para inativo com sucesso" };
+    return { message: "Student successfully moved to inactive" };
   };
   // Deletes an inactive student
   public deleteInactiveStudent = async (
@@ -150,14 +153,16 @@ export class InactiveStudentBusiness {
 
     // Not found error if student doesn't exist
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
 
     // Check permissions for deletion
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== studentDB.teacher_id) {
         throw new ForbiddenError(
-          "Somente quem criou o estudante, pode editá-lo"
+          "Only those who created the student can edit it"
         );
       }
     }
@@ -166,7 +171,7 @@ export class InactiveStudentBusiness {
 
     // Return success message
     const output: DeleteInactiveStudentDTO = {
-      message: "Estudante deletado da lista de inativos com sucesso",
+      message: "Student successfully deleted from inactive list",
     };
 
     return output;
