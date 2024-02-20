@@ -4,16 +4,16 @@
 
 ## Table of Contents::
 
-- <a href="#Objective"> Objective  </a>
+- <a href="#Objective"> Objective </a>
 - <a href="#API Documentation"> API Documentation </a>
 - <a href="#Database Structuring "> Database Structuring </a>
   <a href="#How to Run This Project?"> How to Run This Project? </a>
 - <a href="#Technologies Used"> Technologies Used </a>
-- <a href="#Testing"> Testing  </a>
-- <a href="#Authorship"> Authorship  </a>
-- <a href="# Next Steps">  Next Steps </a>
+- <a href="#Testing"> Testing </a>
+- <a href="# Next Steps"> Next Steps </a>
+- <a href="#Authorship"> Authorship </a>
 
-## Objective 
+## Objective
 
 I will develop an online platform to help independent teachers organize their daily classes with specific information for each student. The main functionalities include:
 
@@ -25,7 +25,7 @@ I will develop an online platform to help independent teachers organize their da
 
 [API Documentation Link](https://documenter.getpostman.com/view/25825355/2sA2r3amFv)
 
-Front-End Repository Link (Under Development)
+Front-End Repository Link (https://github.com/MichelleAntunes/classFlow_Frontend.git)
 Front-End Deploy Link (Under Development)
 
 ### Database Structuring
@@ -36,10 +36,10 @@ Front-End Deploy Link (Under Development)
 
 ```bash
 #Clone this repository
-$ git clone lin krepo
+$ git clone https://github.com/MichelleAntunes/classFlow_Backend.git
 
 #Access the project folder in your terminal
-$ cd folderName
+$ cd classFlow_Backend
 
 # Install the dependencies
 $ npm install
@@ -55,12 +55,18 @@ $ npm run dev
 $ npm run test
 ```
 
-## Technologies used
+## Technologies Used
 
-<!-- //### Front-End:
+### Front-End:
 
-//- JavaScript, React, useEffect, useState, React Router, Custom Hooks, Context
-//- Style: Tailwind CSS -->
+1. [JavaScript](https://www.javascript.com/)
+2. [React] (https://react.dev/)
+3. [useEffect] (https://legacy.reactjs.org/docs/hooks-effect.html)
+4. [useState] (https://legacy.reactjs.org/docs/hooks-state.html)
+5. [React Router] (https://reactrouter.com/en/main)
+6. [Custom Hooks] (https://legacy.reactjs.org/docs/hooks-custom.html)
+7. [Context] (https://legacy.reactjs.org/docs/context.html)
+8. [Tailwind CSS] (https://tailwindcss.com/)
 
 ### Back-End:
 
@@ -101,28 +107,15 @@ Currently (Feb/2024): TeacherBusiness Automated Tests 100%
 
 - Perform tests on the entire Business layer, including teachers, students and inactive students.
 
-## Technologies used
-
-<!-- //### Front-End:
-
-//- JavaScript, React, useEffect, useState, React Router, Custom Hooks, Context
-//- Style: Tailwind CSS -->
-
-### Back-End:
-
-- Node, Axios, Express, TypeScript, SQLite, Knex
-
-### Diagram
-
-![ClassFlow Back-End Diagram](./src/img/diagram.png)
-
-## Project status
-
-In process. ⏳
+### Authorship
 
 Michelle Antunes, maio/2023.
 <br>
 
-Linkedin: www.linkedin.com/in/michelle-antunes-868b24156
+<kbd>[Linkedin](www.linkedin.com/in/michelle-antunes-868b24156)</kbd>
 <br>
 Email: miichelleantunes@outlook.com
+
+### Project status
+
+In process. ⏳
