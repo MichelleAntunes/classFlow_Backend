@@ -40,6 +40,9 @@ export class TeacherController {
       });
 
       const output = await this.teacherBusiness.login(input);
+      if (!output || !output.token) {
+        throw new Error("Token não gerado corretamente");
+      }
 
       res.status(200).send(output);
     } catch (error) {
