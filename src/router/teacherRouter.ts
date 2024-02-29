@@ -19,4 +19,4 @@ const teacherController = new TeacherController(
 
 teacherRouter.post("/signup", teacherController.signup);
 teacherRouter.post("/login", teacherController.login);
-// teacherRouter.put("/resetPassword", teacherController.resetPassword);
+teacherRouter.put("/resetPassword", teacherController.resetPassword);
