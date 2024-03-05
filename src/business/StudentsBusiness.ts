@@ -180,7 +180,7 @@ export class StudentBusiness {
     if (!studentDB) {
       throw new NotFoundError("Estudante com essa id não existe");
     }
-
+    // This part of the code remains to be tested.
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== studentDB.teacher_id) {
         throw new ForbiddenError(

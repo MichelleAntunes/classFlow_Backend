@@ -4,6 +4,7 @@ import { IdGeneratorMock } from "../../mocks/IdGeneratorMock";
 import { TokenManagerMock } from "../../mocks/TokenManagerMock";
 import { StudentDatabaseMock } from "../../mocks/StudentDatabaseMock";
 import { USER_ROLES } from "../../../src/models/Student";
+import { UnauthorizedError } from "../../../src/errors/UnauthorizedError";
 
 describe("Tasting getStudent", () => {
   const studentBusiness = new StudentBusiness(
@@ -84,5 +85,22 @@ describe("Tasting getStudent", () => {
         updatedAt: new Date().toISOString().slice(0, -5), // Remove the last 5 characters (the milliseconds)
       },
     ]);
+  });
+  test("should throw UnauthorizedError when token is invalid", async () => {
+    const input = GetStudentSchema.parse({
+      name: "New Student",
+      email: "new.student@mock.com",
+      phone: "12345678",
+      age: 20,
+      role: USER_ROLES.NORMAL,
+      token: "invalid-token",
+    });
+
+    try {
+      await studentBusiness.getStudents(input);
+      fail("Expected UnauthorizedError, but no error was thrown.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(UnauthorizedError);
+    }
   });
 });
