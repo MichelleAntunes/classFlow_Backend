@@ -26,7 +26,7 @@ describe("Testing deleteStudent", () => {
     const output = await studentBusiness.deleteStudent(input);
 
     expect(output).toEqual({
-      message: "Estudante deletado com sucesso",
+      message: "Student successfully deleted",
     });
   });
   test("should throw UnauthorizedError when token is invalid", async () => {

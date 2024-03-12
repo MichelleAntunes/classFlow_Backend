@@ -178,20 +178,22 @@ export class StudentBusiness {
     const studentDB = await this.studentDatabase.findStudentById(idToDelete);
 
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
     // This part of the code remains to be tested.
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== studentDB.teacher_id) {
         throw new ForbiddenError(
-          "Somente quem criou o estudante, pode editá-lo"
+          "Only those who created the student can edit it"
         );
       }
     }
     await this.studentDatabase.deleteStudentById(idToDelete);
 
     const output: DeleteStudentOutputDTO = {
-      message: "Estudante deletado com sucesso",
+      message: "Student successfully deleted",
     };
 
     return output;
@@ -202,7 +204,9 @@ export class StudentBusiness {
   ): Promise<Student | undefined> => {
     const studentDB = await this.studentDatabase.findStudentById(id);
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
     const payload = this.tokenManager.getPayload(token);
 
@@ -253,12 +257,14 @@ export class StudentBusiness {
     const studentDB = await this.studentDatabase.findStudentById(idToEdit);
 
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== studentDB.teacher_id) {
         throw new ForbiddenError(
-          "Somente quem criou o estudante, pode editá-lo"
+          "Only those who created the student can edit it"
         );
       }
     }
@@ -307,7 +313,7 @@ export class StudentBusiness {
     await this.studentDatabase.updateStudent(updatedStudentDB);
 
     const output: EditStudentOutputDTO = {
-      message: "Edição realizada com sucesso",
+      message: "Edition successfully completed",
     };
 
     return output;
@@ -329,11 +335,15 @@ export class StudentBusiness {
     const studentDB = await this.studentDatabase.findStudentById(studentId);
 
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
 
     if (payload.id !== studentDB.teacher_id) {
-      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+      throw new ForbiddenError(
+        " Only those who created the student can edit it"
+      );
     }
     const currentDate = new Date();
 
@@ -351,7 +361,7 @@ export class StudentBusiness {
     await this.studentDatabase.insertNotesByStudentId(newNoteDB);
 
     const output: EditStudentOutputDTO = {
-      message: "Nova nota adicionada com sucesso",
+      message: "New note successfully added.",
     };
 
     return output;
@@ -368,18 +378,20 @@ export class StudentBusiness {
     }
     const noteDB = await this.studentDatabase.findNoteById(idToDelete);
     if (!noteDB) {
-      throw new NotFoundError("Nota com essa id não existe");
+      throw new NotFoundError("Note with this id does not exist");
     }
 
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== noteDB.teacher_id) {
-        throw new ForbiddenError("Somente quem criou o nota, pode deletá-lo");
+        throw new ForbiddenError(
+          "Only those who created the note can delete it"
+        );
       }
     }
     await this.studentDatabase.deleteNotesByNoteId(idToDelete);
 
     const output: DeleteStudentOutputDTO = {
-      message: "Nota deletada com sucesso",
+      message: "Note successfully deleted",
     };
 
     return output;
@@ -398,12 +410,12 @@ export class StudentBusiness {
     const noteDB = await this.studentDatabase.findNoteById(idToEdit);
 
     if (!noteDB) {
-      throw new NotFoundError("Nota com essa id não existe");
+      throw new NotFoundError("Note with this id does not exist");
     }
 
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== noteDB.teacher_id) {
-        throw new ForbiddenError("Somente quem criou o nota, pode editá-lo");
+        throw new ForbiddenError("Only those who created the note can edit it");
       }
     }
     const newNote = new Notes(
@@ -421,7 +433,7 @@ export class StudentBusiness {
     await this.studentDatabase.updateNote(updatedNoteDB);
 
     const output: EditNoteOutputDTO = {
-      message: "Nota editada com sucesso",
+      message: "Note successfully edited",
     };
 
     return output;
@@ -443,11 +455,15 @@ export class StudentBusiness {
     const studentDB = await this.studentDatabase.findStudentById(studentId);
 
     if (!studentDB) {
-      throw new NotFoundError("Estudante com essa id não existe");
+      throw new NotFoundError(
+        "There's no such thing as a student with this id"
+      );
     }
 
     if (payload.id !== studentDB.teacher_id) {
-      throw new ForbiddenError("Somente quem criou o estudante, pode editá-lo");
+      throw new ForbiddenError(
+        "Only those who created the student can edit it"
+      );
     }
     const currentDate = new Date();
 
@@ -465,7 +481,7 @@ export class StudentBusiness {
     await this.studentDatabase.insertAnnotationsByStudentId(newAnnotationDB);
 
     const output: CreateAnnotationOutputDTO = {
-      message: "Nova anotação adicionada com sucesso",
+      message: "New annotation successfully added",
     };
 
     return output;
@@ -484,20 +500,20 @@ export class StudentBusiness {
       idToDelete
     );
     if (!annotationDB) {
-      throw new NotFoundError("Anotação com essa id não existe");
+      throw new NotFoundError("Annotation with this id does not exist");
     }
 
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== annotationDB.teacher_id) {
         throw new ForbiddenError(
-          "Somente quem criou a anotação, pode deletá-la"
+          "Only the person who created the note can delete it"
         );
       }
     }
     await this.studentDatabase.deleteAnnotationsByAnnotationId(idToDelete);
 
     const output: DeleteStudentOutputDTO = {
-      message: "Nota deletada com sucesso",
+      message: "Note successfully deleted",
     };
 
     return output;
@@ -518,12 +534,12 @@ export class StudentBusiness {
     );
 
     if (!annotationDB) {
-      throw new NotFoundError("Anotação com essa id não existe");
+      throw new NotFoundError("Annotation with this id does not exist");
     }
 
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== annotationDB.teacher_id) {
-        throw new ForbiddenError("Somente quem criou o nota, pode editá-la");
+        throw new ForbiddenError("Only those who created the note can edit it");
       }
     }
     const newAnnotation = new Annotation(
@@ -541,7 +557,7 @@ export class StudentBusiness {
     await this.studentDatabase.updateAnnotation(updatedAnnotationDB);
 
     const output: EditAnnotationOutputDTO = {
-      message: "Anotação editada com sucesso",
+      message: "Annotation successfully edited",
     };
 
     return output;

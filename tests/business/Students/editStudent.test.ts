@@ -29,7 +29,7 @@ describe("Testing editStudent", () => {
 
     // Assert
     expect(output).toEqual({
-      message: "Edição realizada com sucesso",
+      message: "Edition successfully completed",
     });
   });
 });
