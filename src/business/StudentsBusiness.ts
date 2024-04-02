@@ -198,6 +198,7 @@ export class StudentBusiness {
 
     return output;
   };
+
   public findStudentById = async (
     id: string,
     token: string
@@ -261,6 +262,8 @@ export class StudentBusiness {
         "There's no such thing as a student with this id"
       );
     }
+
+    //this piece of code needs to be tested
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== studentDB.teacher_id) {
         throw new ForbiddenError(
@@ -340,6 +343,7 @@ export class StudentBusiness {
       );
     }
 
+    //this piece of code needs to be tested
     if (payload.id !== studentDB.teacher_id) {
       throw new ForbiddenError(
         " Only those who created the student can edit it"
@@ -381,6 +385,7 @@ export class StudentBusiness {
       throw new NotFoundError("Note with this id does not exist");
     }
 
+    //this piece of code needs to be tested
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== noteDB.teacher_id) {
         throw new ForbiddenError(
@@ -413,6 +418,7 @@ export class StudentBusiness {
       throw new NotFoundError("Note with this id does not exist");
     }
 
+    //this piece of code needs to be tested
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== noteDB.teacher_id) {
         throw new ForbiddenError("Only those who created the note can edit it");
@@ -459,7 +465,7 @@ export class StudentBusiness {
         "There's no such thing as a student with this id"
       );
     }
-
+    //this piece of code needs to be tested
     if (payload.id !== studentDB.teacher_id) {
       throw new ForbiddenError(
         "Only those who created the student can edit it"
@@ -503,6 +509,7 @@ export class StudentBusiness {
       throw new NotFoundError("Annotation with this id does not exist");
     }
 
+    //this piece of code needs to be tested
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== annotationDB.teacher_id) {
         throw new ForbiddenError(
@@ -513,7 +520,7 @@ export class StudentBusiness {
     await this.studentDatabase.deleteAnnotationsByAnnotationId(idToDelete);
 
     const output: DeleteStudentOutputDTO = {
-      message: "Note successfully deleted",
+      message: "Annotation successfully deleted",
     };
 
     return output;
@@ -537,6 +544,7 @@ export class StudentBusiness {
       throw new NotFoundError("Annotation with this id does not exist");
     }
 
+    //this piece of code needs to be tested
     if (payload.role !== USER_ROLES.ADMIN) {
       if (payload.id !== annotationDB.teacher_id) {
         throw new ForbiddenError("Only those who created the note can edit it");

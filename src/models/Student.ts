@@ -282,6 +282,7 @@ export class Student {
   public setPhoto(value: ImageData | string | null): void {
     this.photo = value;
   }
+
   public getTeacherId(): string {
     return this.teacherId;
   }

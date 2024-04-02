@@ -6,8 +6,6 @@ export interface EditStudentInputDTO {
   age: number;
   email: string;
   phone: string;
-  // notes: string[];
-  // annotations: string[];
   photo: string;
 }
 
@@ -29,8 +27,6 @@ export const EditStudentSchema = z
         message: "'phone' deve ser um número de telefone válido",
       })
       .optional(),
-    // notes: z.array(z.string()).default([]),
-    // annotations: z.array(z.string()).default([]),
     photo: z
       .string()
       .refine(

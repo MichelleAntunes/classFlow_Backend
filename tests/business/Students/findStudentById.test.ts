@@ -11,17 +11,41 @@ describe("Testing findStudentById", () => {
     new IdGeneratorMock(),
     new TokenManagerMock()
   );
-  test("Return error if student id not found", async () => {
-    const input = {
-      id: "invalid-id",
-      token: "token-mock-teacher",
-    };
+
+  test("should throw NotFoundError when student id is not found", async () => {
+    const id = "non-existing-id";
+    const token = "token-mock-teacher";
 
     try {
-      await studentBusiness.findStudentById(input.id, input.token);
-      fail("Expected NotFoundError, but no error was thrown. ");
+      await studentBusiness.findStudentById(id, token);
+      fail("Expected NotFoundError, but no error was thrown.");
     } catch (error) {
       expect(error).toBeInstanceOf(NotFoundError);
+      expect((error as Error).message).toEqual(
+        "There's no such thing as a student with this id"
+      );
     }
+  });
+
+  test("should throw UnauthorizedError when token is invalid", async () => {
+    const id = "id-student-mock1";
+    const token = "invalid-token";
+
+    try {
+      await studentBusiness.findStudentById(id, token);
+      fail("Expected UnauthorizedError, but no error was thrown.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(UnauthorizedError);
+    }
+  });
+
+  test("should return student when id and token are valid", async () => {
+    const id = "id-student-mock1";
+    const token = "token-mock-teacher";
+
+    const student = await studentBusiness.findStudentById(id, token);
+
+    expect(student).toBeDefined();
+    expect(student!.getId()).toEqual(id);
   });
 });
