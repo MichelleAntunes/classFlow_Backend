@@ -30,7 +30,7 @@ Front-End Deploy Link (Under Development)
 
 ### Database Structuring
 
-[ClassFlow Back-End Diagram](./img/diagram.png)
+![ClassFlow Back-End Diagram](./src/img/diagram.png)
 
 ## How to run this project?
 
@@ -60,13 +60,13 @@ $ npm run test
 ### Front-End:
 
 1. [JavaScript](https://www.javascript.com/)
-2. [React] (https://react.dev/)
-3. [useEffect] (https://legacy.reactjs.org/docs/hooks-effect.html)
-4. [useState] (https://legacy.reactjs.org/docs/hooks-state.html)
-5. [React Router] (https://reactrouter.com/en/main)
-6. [Custom Hooks] (https://legacy.reactjs.org/docs/hooks-custom.html)
-7. [Context] (https://legacy.reactjs.org/docs/context.html)
-8. [Tailwind CSS] (https://tailwindcss.com/)
+2. [React](https://react.dev/)
+3. [useEffect](https://legacy.reactjs.org/docs/hooks-effect.html)
+4. [useState](https://legacy.reactjs.org/docs/hooks-state.html)
+5. [React Router](https://reactrouter.com/en/main)
+6. [Custom Hooks](https://legacy.reactjs.org/docs/hooks-custom.html)
+7. [Context](https://legacy.reactjs.org/docs/context.html)
+8. [Tailwind CSS](https://tailwindcss.com/)
 
 ### Back-End:
 
@@ -91,7 +91,9 @@ https://documenter.getpostman.com/view/25825355/2sA2r3amFv
 
 Automated testing is also being carried out using Jest.
 The main focus of automated testing in this project is the Business layer, as this is where all the platform's business rules are located.
-Currently (Feb/2024): TeacherBusiness Automated Tests 100%
+Currently (Abril/2024): Entire project 97.11%.
+
+![ClassFlow Back-End Test-Jest](./src/img/testJest.png)
 
 ### Next steps
 

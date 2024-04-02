@@ -27,29 +27,69 @@ describe("Testing login", () => {
       token: "token-mock-teacher",
     });
   });
-  test("It should trigger an error if the e-mail is not valid", async () => {
+  test("should throw BaseError if teacher is not found", async () => {
+    // Arrange
+
+    const email = "nonexistent@example.com";
+
+    // Act
     try {
-      const input = LoginSchema.parse({
-        email: "teacherrmock.com",
-        password: "Mock-123",
-      });
+      await teacherBusiness.login({ email, password: "mock-password" });
+      fail("Expected BaseError, but no error was thrown.");
+    } catch (error: any) {
+      // Assert
+      expect(error).toBeInstanceOf(BaseError);
+      expect(error.statusCode).toBe(400);
+      expect(error.message).toBe("Invalid e-mail and/or password");
+    }
+  });
+
+  test("should throw BaseError when logging in with invalid password", async () => {
+    const input = LoginSchema.parse({
+      email: "teacher@mock.com",
+      password: "InvalidPpassword123!",
+    });
+    try {
+      await teacherBusiness.login(input);
+      fail("Expected ZodError, but no error was thrown.");
     } catch (error) {
       if (error instanceof BaseError) {
+        expect(error).toBeInstanceOf(BaseError);
         expect(error.statusCode).toBe(400);
         expect(error.message).toBe("Invalid e-mail and/or password");
       }
     }
   });
-  test("It should trigger an error if the password is not valid", async () => {
+  test("should throw BaseError when logging in with invalid email", async () => {
+    try {
+      const input = LoginSchema.parse({
+        email: "invalid-email",
+        password: "ValidPassword123!",
+      });
+      fail("Expected ZodError, but no error was thrown.");
+    } catch (error: any) {
+      expect(error).toBeInstanceOf(ZodError);
+      if (error instanceof ZodError) {
+        expect(error.errors).toHaveLength(1);
+        expect(error.errors[0].message).toBe("Invalid email");
+      }
+    }
+  });
+
+  test("should throw BaseError when logging in with invalid password", async () => {
     try {
       const input = LoginSchema.parse({
         email: "teacher@mock.com",
-        password: "mock-123",
+        password: "invalid-password",
       });
-    } catch (error) {
-      if (error instanceof BaseError) {
-        expect(error.statusCode).toBe(400);
-        expect(error.message).toBe("Invalid e-mail and/or password");
+      fail("Expected ZodError, but no error was thrown.");
+    } catch (error: any) {
+      expect(error).toBeInstanceOf(ZodError);
+      if (error instanceof ZodError) {
+        expect(error.errors).toHaveLength(1);
+        expect(error.errors[0].message).toBe(
+          "The password must contain at least one lowercase letter, one uppercase letter, one number and one special character."
+        );
       }
     }
   });
