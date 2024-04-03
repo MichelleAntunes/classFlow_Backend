@@ -28,4 +28,14 @@ export class TeacherDataBase extends BaseDatabase {
       .where({ email })
       .update({ password: newPassword });
   };
+  public getTeacher = async (token: string): Promise<any[]> => {
+    const teachers = await BaseDatabase.connection(
+      TeacherDataBase.TABLE_TEACHERS
+    )
+      .where({
+        token,
+      })
+      .select();
+    return teachers;
+  };
 }
