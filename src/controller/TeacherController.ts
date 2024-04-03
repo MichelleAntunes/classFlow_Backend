@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { SignupSchema } from "../dtos/teacher/signup.dto";
 import { LoginSchema } from "../dtos/teacher/login.dto";
 import { ResetPasswordSchema } from "../dtos/teacher/resetPassword.dto";
+import { GetTeacherSchema } from "../dtos/teacher/getTeacher.dto";
 
 export class TeacherController {
   constructor(private teacherBusiness: TeacherBusiness) {}
@@ -70,6 +71,25 @@ export class TeacherController {
     } catch (error) {
       console.log(error);
 
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
+
+  public getTeacher = async (req: Request, res: Response) => {
+    try {
+      const input = GetTeacherSchema.parse({
+        token: req.headers.authorization,
+      });
+      const output = await this.teacherBusiness.getTeacher(input);
+      res.send(output);
+    } catch (error) {
+      console.log(error);
       if (error instanceof ZodError) {
         res.status(400).send(error.issues);
       } else if (error instanceof BaseError) {

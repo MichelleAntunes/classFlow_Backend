@@ -1,10 +1,16 @@
 import { TeacherDataBase } from "../database/TeacherDatabase";
+import { GetStudentOutputDTO } from "../dtos/student/getStudents.dto";
+import {
+  GetTeacherInputDTO,
+  GetTeacherOutputDTO,
+} from "../dtos/teacher/getTeacher.dto";
 import { LoginInputDTO, LoginOutputDTO } from "../dtos/teacher/login.dto";
 import { ResetPasswordInputDTO } from "../dtos/teacher/resetPassword.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../dtos/teacher/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { BaseError } from "../errors/BaseError";
 import { NotFoundError } from "../errors/NotFoundError";
+import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { USER_ROLES } from "../models/Student";
 import { Teacher, TokenPayload } from "../models/Teacher";
 import { HashManager } from "../services/HashManager";
@@ -107,5 +113,33 @@ export class TeacherBusiness {
 
     const hashedPassword = await this.hashManager.hash(newPassword);
     await this.teacherDatabase.updatePasswordByEmail(email, hashedPassword);
+  };
+  public getTeacher = async (
+    input: GetTeacherInputDTO
+  ): Promise<GetTeacherOutputDTO> => {
+    const { token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const teacherDB = await this.teacherDatabase.getTeacher(token);
+
+    const teachers = teacherDB.map((eachTeacher: any) => {
+      const teacher = new Teacher(
+        eachTeacher.id,
+        eachTeacher.name,
+        eachTeacher.email,
+        eachTeacher.password,
+        eachTeacher.createdAt,
+        eachTeacher.role,
+        eachTeacher.photo
+      );
+      return teacher.toBusinessModel();
+    });
+
+    return teachers;
   };
 }
