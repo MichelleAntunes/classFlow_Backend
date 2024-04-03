@@ -1,4 +1,4 @@
-import { TeacherDB } from "../models/Teacher";
+import { Teacher, TeacherDB } from "../models/Teacher";
 import { BaseDatabase } from "./BaseDatabase";
 
 export class TeacherDataBase extends BaseDatabase {
@@ -28,14 +28,10 @@ export class TeacherDataBase extends BaseDatabase {
       .where({ email })
       .update({ password: newPassword });
   };
-  public getTeacher = async (token: string): Promise<any[]> => {
+  public getAllTeachers = async (): Promise<TeacherDB[]> => {
     const teachers = await BaseDatabase.connection(
       TeacherDataBase.TABLE_TEACHERS
-    )
-      .where({
-        token,
-      })
-      .select();
+    ).select();
     return teachers;
   };
 }
