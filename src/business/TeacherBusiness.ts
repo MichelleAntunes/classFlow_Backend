@@ -1,6 +1,10 @@
 import { TeacherDataBase } from "../database/TeacherDatabase";
 import { GetStudentOutputDTO } from "../dtos/student/getStudents.dto";
 import {
+  DeleteTeacherInputDTO,
+  DeleteTeacherOutputDTO,
+} from "../dtos/teacher/deleteTeacher.dto";
+import {
   GetTeacherInputDTO,
   GetTeacherOutputDTO,
 } from "../dtos/teacher/getTeacher.dto";
@@ -9,6 +13,7 @@ import { ResetPasswordInputDTO } from "../dtos/teacher/resetPassword.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../dtos/teacher/signup.dto";
 import { BadRequestError } from "../errors/BadRequestError";
 import { BaseError } from "../errors/BaseError";
+import { ForbiddenError } from "../errors/ForbiddenError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { USER_ROLES } from "../models/Student";
@@ -98,17 +103,18 @@ export class TeacherBusiness {
     return output;
   };
   public resetPassword = async (
-    input: ResetPasswordInputDTO
+    email: string,
+    newPassword: string,
+    confirmPassword: string
   ): Promise<void> => {
-    const { email, newPassword, confirmPassword } = input;
-
+    // Ajuste feito aqui
     if (newPassword !== confirmPassword) {
-      throw new BaseError(400, "The passwords don't match");
+      throw new BaseError(400, "As senhas não coincidem");
     }
 
     const teacher = await this.teacherDatabase.findTeacherByEmail(email);
     if (!teacher) {
-      throw new BaseError(400, "Teacher not found");
+      throw new BaseError(400, "Professor não encontrado");
     }
 
     const hashedPassword = await this.hashManager.hash(newPassword);
@@ -116,17 +122,38 @@ export class TeacherBusiness {
   };
   public getTeachers = async (): Promise<TeacherDB[]> => {
     const teachersDB = await this.teacherDatabase.getAllTeachers();
-    const teachers = teachersDB.map((teacher) =>
-      new Teacher(
-        teacher.id,
-        teacher.name,
-        teacher.email,
-        teacher.password,
-        teacher.created_at,
-        teacher.role,
-        teacher.photo
-      ).toDBModel()
+    return teachersDB;
+  };
+  public deleteTeacher = async (
+    input: DeleteTeacherInputDTO
+  ): Promise<DeleteTeacherOutputDTO> => {
+    const { token, idTeacherToDelete } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (!payload) {
+      throw new UnauthorizedError();
+    }
+
+    const teacherDB = await this.teacherDatabase.findTeacherById(
+      idTeacherToDelete
     );
-    return teachers;
+
+    if (!teacherDB) {
+      throw new NotFoundError(
+        "There's no such thing as a teacher with this id"
+      );
+    }
+    if (payload.id !== teacherDB.id) {
+      throw new ForbiddenError(
+        "Only those who created the student can edit it"
+      );
+    }
+    await this.teacherDatabase.deleteTeacherById(idTeacherToDelete);
+
+    const output: DeleteTeacherOutputDTO = {
+      message: "Teacher successfully deleted",
+    };
+    return output;
   };
 }

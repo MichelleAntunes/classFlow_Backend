@@ -6,6 +6,8 @@ import { SignupSchema } from "../dtos/teacher/signup.dto";
 import { LoginSchema } from "../dtos/teacher/login.dto";
 import { ResetPasswordSchema } from "../dtos/teacher/resetPassword.dto";
 import { GetTeacherSchema } from "../dtos/teacher/getTeacher.dto";
+import { DeleteTeacherSchema } from "../dtos/teacher/deleteTeacher.dto";
+import { Teacher, TeacherDB } from "../models/Teacher";
 
 export class TeacherController {
   constructor(private teacherBusiness: TeacherBusiness) {}
@@ -66,7 +68,11 @@ export class TeacherController {
         confirmPassword: req.body.confirmPassword,
       });
 
-      await this.teacherBusiness.resetPassword(input);
+      await this.teacherBusiness.resetPassword(
+        input.email,
+        input.newPassword,
+        input.confirmPassword
+      );
       res.status(200).send("Senha redefinida com sucesso");
     } catch (error) {
       console.log(error);
@@ -82,12 +88,31 @@ export class TeacherController {
   };
   public getTeachers = async (req: Request, res: Response) => {
     try {
-      const teachers = await this.teacherBusiness.getTeachers();
+      const teachers: TeacherDB[] = await this.teacherBusiness.getTeachers();
       res.status(200).send(teachers);
     } catch (error) {
       console.log(error);
 
       if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
+      } else {
+        res.status(500).send("Erro inesperado");
+      }
+    }
+  };
+  public deleteTeacher = async (req: Request, res: Response) => {
+    try {
+      const input = DeleteTeacherSchema.parse({
+        token: req.headers.authorization,
+        idTeacherToDelete: req.params.id,
+      });
+      const output = await this.teacherBusiness.deleteTeacher(input);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
         res.status(error.statusCode).send(error.message);
       } else {
         res.status(500).send("Erro inesperado");
