@@ -107,7 +107,6 @@ export class TeacherBusiness {
     newPassword: string,
     confirmPassword: string
   ): Promise<void> => {
-    // Ajuste feito aqui
     if (newPassword !== confirmPassword) {
       throw new BaseError(400, "As senhas não coincidem");
     }

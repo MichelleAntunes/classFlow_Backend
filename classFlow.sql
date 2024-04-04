@@ -11,6 +11,10 @@ CREATE TABLE teachers (
   photo BLOB DEFAULT '../img/noImg.jpg',
   role TEXT NOT NULL
 );
+
+-- Altera a tabela teachers, modificando a coluna photo para TEXT
+
+
 -- Table students (alunos): Stores information about students, including a foreign key teacher_id that references the teacher table to indicate which teacher is associated with each student.
 CREATE TABLE students (
   id TEXT PRIMARY KEY NOT NULL,
