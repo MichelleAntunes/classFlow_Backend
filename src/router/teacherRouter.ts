@@ -21,3 +21,4 @@ teacherRouter.post("/signup", teacherController.signup);
 teacherRouter.post("/login", teacherController.login);
 teacherRouter.put("/resetPassword", teacherController.resetPassword);
 teacherRouter.get("/teachers", teacherController.getTeachers);
+teacherRouter.delete("/:id", teacherController.deleteTeacher);

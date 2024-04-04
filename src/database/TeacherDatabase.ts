@@ -20,6 +20,16 @@ export class TeacherDataBase extends BaseDatabase {
 
     return userDB;
   };
+  public findTeacherById = async (
+    id: string
+  ): Promise<TeacherDB | undefined> => {
+    const [userDB]: Array<TeacherDB | undefined> =
+      await BaseDatabase.connection(TeacherDataBase.TABLE_TEACHERS)
+        .select()
+        .where({ id });
+
+    return userDB;
+  };
   public updatePasswordByEmail = async (
     email: string,
     newPassword: string
@@ -33,5 +43,10 @@ export class TeacherDataBase extends BaseDatabase {
       TeacherDataBase.TABLE_TEACHERS
     ).select();
     return teachers;
+  };
+  public deleteTeacherById = async (id: string): Promise<void> => {
+    await BaseDatabase.connection(TeacherDataBase.TABLE_TEACHERS)
+      .delete()
+      .where({ id });
   };
 }
