@@ -22,7 +22,12 @@ describe("Testing resetPassword", () => {
       confirmPassword: "New-Mock-123",
     });
 
-    const output = await teacherBusiness.resetPassword(input);
+    const output = await teacherBusiness.resetPassword(
+      input.email,
+      input.newPassword,
+      input.confirmPassword
+    );
+    return output;
   });
 
   test("It should trigger an error if the e-mail is not valid", async () => {
